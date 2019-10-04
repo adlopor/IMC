@@ -302,34 +302,116 @@ void PerceptronMulticapa::retropropagarError(double* objetivo) {//Pseudocódigo 
 // Acumular los cambios producidos por un patrón en deltaW
 void PerceptronMulticapa::acumularCambio() {
 
+	for(int i=1;i<nNumCapas;i++){//Recorremos todas las capas ocultas y la de salida del Perceptrón.
+	
+		for(int j=0;j<pCapas[i].nNumNeuronas;j++){//Recorremos cada neurona de las capas recorridas
+    
+    		for(k=1;k<pCapas[i-1].nNumNeuronas;k++){//Recorremos las neuronas de la capa anterior.
+    
+    			pCapas[i].pNeuronas[j].ultimoDeltaW[k]=pCapas[i].pNeuronas[j].deltaW[k];
+    			pCapas[i].pNeuronas[j].deltaW[k]=pCapas[i].pNeuronas[j].deltaW[k] + pCapas[i].pNeuronas[j].dX * pCapas[i-1].pNeuronas[j].x;
+    
+    		}
+			
+			pCapas[i].pNeuronas[j].ultimoDeltaW[0]=pCapas[i].pNeuronas[j].deltaW[0];
+    		pCapas[i].pNeuronas[j].deltaW[0]=pCapas[i].pNeuronas[j].deltaW[0]+pCapas[i].pNeuronas[j].dX;
+		}
+	}
 
 }
 
 // ------------------------------
 // Actualizar los pesos de la red, desde la primera capa hasta la última
 void PerceptronMulticapa::ajustarPesos() {
-
+	double eta=dEta;
+	for(int i=1;i<nNumCapas;i++){
+	
+		for(int j=0;j<pCapas[i].nNumNeuronas;j++){
+    
+    		for(k=1;k<pCapas[i-1].nNumNeuronas;k++){
+    
+    			pCapas[i].pNeuronas[j].w[k]=pCapas[i].pNeuronas[j].w[k]-eta*pCapas[i].pNeuronas[j].deltaW[k]-dMu*(eta*pCapas[i].pNeuronas[j].ultimoDeltaW[k]);
+    
+    		}
+	
+			pCapas[i].pNeuronas[j].w[0]=pCapas[i].pNeuronas[j].w[0]-eta*pCapas[i].pNeuronas[j].deltaW[0]-dMu*(eta*pCapas[i].pNeuronas[j].ultimoDeltaW[0]);    		
+		
+		}
+		
+		eta=pow(dDecremento,-(1-i))*eta;
+	}
 }
 
 // ------------------------------
 // Imprimir la red, es decir, todas las matrices de pesos
 void PerceptronMulticapa::imprimirRed() {
+	for(int i=1;i<nNumCapas;i++){
+	
+		std::cout<<"Capa "<<i<<std::endl<<"________________"<<std::endl;
+	
+		for(int j=0;j<pCapas[i].nNumNeuronas;j++){
 
+    		for(k=0;k<pCapas[i-1].nNumNeuronas;k++){
+
+    			std::cout<<pCapas[i].pNeuronas[j].w[k]<<"\t";
+
+    		}
+    		std::cout<<std::endl;
+		}
+	}
 }
 
 // ------------------------------
 // Simular la red: propagar las entradas hacia delante, retropropagar el error y ajustar los pesos
 // entrada es el vector de entradas del patrón y objetivo es el vector de salidas deseadas del patrón
 void PerceptronMulticapa::simularRedOnline(double* entrada, double* objetivo) {
-
+	for(int i=1;i<nNumCapas;i++){
+	
+		for(int j=0;j<pCapas[i].nNumNeuronas;j++){
+    
+    		for(k=0;k<pCapas[i-1].nNumNeuronas;k++){
+    
+    			pCapas[i].pNeuronas[j].deltaW[k]=pCapas[i].pNeuronas[j].ultimoDeltaW[k]=0;
+    
+    		}
+		}		
+    }
+	
+	for(int l=0;l<pCapas[0].nNumNeuronas;l++){
+	
+		pCapas[0].pNeuronas[l].x=entrada[l];
+	}
+	
+	propagarEntradas(); 
+	retropropagarError(objetivo); 
+	acumularCambio(); 
+	ajustarPesos();
 }
 
 // ------------------------------
 // Leer una matriz de datos a partir de un nombre de fichero y devolverla
 Datos* PerceptronMulticapa::leerDatos(const char *archivo) {
-
-
-	return NULL;
+	std::ifstream fichero (archivo);	
+	
+	Datos* datos_fichero=new Datos;
+	fichero>>datos_fichero->nNumEntradas>>datos_fichero->nNumSalidas>>datos_fichero->nNumPatrones;
+	datos_fichero->entradas=new double[datos_fichero->nNumPatrones][datos_fichero->nNumEntradas];
+	datos_fichero->salidas=new double[datos_fichero->nNumPatrones][datos_fichero->nNumSalidas];
+	
+	for(int i=0;i<datos_fichero->nNumPatrones;i++){
+	
+		  for(int j=0;j<datos_fichero->nNumEntradas;j++){
+	
+			  fichero>>datos_fichero->entradas[i][j];
+	
+		  }
+		  for(int k=0;k<datos_fichero->nNumSalidas;k++){
+	
+			  fichero>>datos_fichero->salidas[i][k];
+		  }
+	}
+	
+	return datos_fichero;
 }
 
 // ------------------------------
@@ -344,7 +426,19 @@ void PerceptronMulticapa::entrenarOnline(Datos* pDatosTrain) {
 // ------------------------------
 // Probar la red con un conjunto de datos y devolver el error MSE cometido
 double PerceptronMulticapa::test(Datos* pDatosTest) {
-	return -1.0;
+	
+	double mse=0.0;
+	
+	for(int i=0;i<pDatosTest->nNumEntradas;i++){
+	
+		alimentarEntradas(pDatosTest->entradas[i])
+		propagarEntradas();
+	
+		mse+=calcularErrorSalida();
+	
+	}
+	
+	return mse/pDatosTest->nNumEntradas;
 }
 
 // OPCIONAL - KAGGLE
