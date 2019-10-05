@@ -21,8 +21,9 @@ using namespace imc;
 using namespace std;
 
 int main(int argc, char **argv) {
-//Procesar los argumentos de la línea de comandos
-	bool tflag=false,Tflag=false,iflag=false,lflag=false,hflag=false,eflag=false,mflag=false,vflag=false,dflag=false,wflag=false,pflag=false;
+
+	//Procesar los argumentos de la línea de comandos
+	bool tflag=false,Tflag=false, iflag=false, lflag=false, hflag=false, eflag=false, mflag=false, vflag=false, dflag=false, wflag=false, pflag=false;
 	char *tvalue=NULL,* Tvalue=NULL,* ivalue,* lvalue,* hvalue,* evalue,* mvalue,* vvalue,* dvalue,* wvalue=NULL;
 	int c;
 
@@ -30,10 +31,13 @@ int main(int argc, char **argv) {
 
 	//a: opción que requiere un argumento
 	//a:: el argumento requerido es opcional
+	
 	while((c=getopt(argc,argv,"t:T:i:l:h:e:m:v:d:w:p"))!=-1){
+	
 		//Se han añadido los parámetros necesarios para usar el modo opcional de predicción (kaggle).
 		//Añadir el resto de parámetros que sean necesarios para la parte básica de las prácticas.
 		switch(c){
+	
 			case 't':
 				tflag=true;
 				tvalue=optarg;
@@ -98,7 +102,8 @@ int main(int argc, char **argv) {
 				break;
 
 			case '?':
-				if(optopt=='T' || optopt=='w' || optopt=='p'){
+				
+				if(optopt=='T' || optopt=='w' || optopt=='p' || optopt=='t' || optopt=='i' || optopt=='l' || optopt=='h' || optopt=='e' || optopt=='m' || optopt=='v' || optopt=='d'){
 					fprintf(stderr,"La opción -%c requiere un argumento.\n",optopt);
 				}
 
@@ -117,8 +122,8 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	if(tflag==false or Tflag==false){
-		cout << "Error: debe especificar los ficheros de datos" << endl;
+	if(tflag==false){
+		cout << "Error: Opción t es obligatoria." << endl;
 
 		return EXIT_FAILURE;
 	}
@@ -197,16 +202,16 @@ int main(int argc, char **argv) {
 		Datos * pDatosTest=mlp.leerDatos(Tvalue);
 
 		if(pDatosTrain==NULL or pDatosTest==NULL){
-			return EXIT_FAILURE;
+				return EXIT_FAILURE;
 		}
 
 		//Inicializar vector topología
 		int * topologia=new int[capas+2];
 
-		topologia[0]=pDatosTrain->nNumEntradas;
+		topologia[0] = pDatosTrain->nNumEntradas;
 
-		for(int i=1;i<(capas+2-1);i++){
-			topologia[i]=neuronas;
+		for(int i=1; i<(capas+2-1); i++){
+			topologia[i] = neuronas;
 		}
 
 		topologia[capas+2-1]=pDatosTrain->nNumSalidas;
@@ -215,11 +220,11 @@ int main(int argc, char **argv) {
 		mlp.inicializar(capas+2,topologia);
 
 		//Semilla de los números aleatorios
-		int semillas[]={100,200,300,400,500};
+		int semillas[]={1,2,3,4,5};
 		double * erroresTest=new double[5];
 		double * erroresTrain=new double[5];
 		double mejorErrorTest=1.0;
-		for(int i=0;i<5;i++){
+		for(int i=0; i<5; i++){
 			cout << "**********" << endl;
 			cout << "SEMILLA " << semillas[i] << endl;
 			cout << "**********" << endl;
@@ -231,7 +236,7 @@ int main(int argc, char **argv) {
 			cout << "Finalizamos => Error de test final: " << erroresTest[i] << endl;
 
 			//(Opcional - Kaggle) Guardamos los pesos cada vez que encontremos un modelo mejor.
-			if(wflag && erroresTest[i]<=mejorErrorTest){
+			if(wflag && erroresTest[i] <= mejorErrorTest){
 				mlp.guardarPesos(wvalue);
 				mejorErrorTest=erroresTest[i];
 			}
@@ -239,13 +244,13 @@ int main(int argc, char **argv) {
 
 		cout << "HEMOS TERMINADO TODAS LAS SEMILLAS" << endl;
 
-		double mediaErrorTest=0,desviacionTipicaErrorTest=0;
-		double mediaErrorTrain=0,desviacionTipicaErrorTrain=0;
+		double mediaErrorTest = 0,desviacionTipicaErrorTest = 0;
+		double mediaErrorTrain = 0,desviacionTipicaErrorTrain = 0;
         
 		//Calcular medias y desviaciones típicas de entrenamiento y test
-		for(int i=0;i<5;i++){
-			mediaErrorTrain+=erroresTrain[i];
-			mediaErrorTest+=erroresTest[i];
+		for(int i=0; i<5; i++){
+			mediaErrorTrain += erroresTrain[i];
+			mediaErrorTest += erroresTest[i];
 		}
 
 		mediaErrorTest/=5;
@@ -255,12 +260,12 @@ int main(int argc, char **argv) {
 		double auxTrain=0;
 
 		for(int i=0;i<5;i++){
-			auxTest+=pow(erroresTest[i]-mediaErrorTest,2);
-			auxTrain+=pow(erroresTrain[i]-mediaErrorTrain,2);
+			auxTest += pow(erroresTest[i]-mediaErrorTest,2);
+			auxTrain += pow(erroresTrain[i]-mediaErrorTrain,2);
 		}
 
-		desviacionTipicaErrorTest=sqrt(0.25*auxTest);
-		desviacionTipicaErrorTrain=sqrt(0.25*auxTrain);
+		desviacionTipicaErrorTest = sqrt(0.25*auxTest);
+		desviacionTipicaErrorTrain = sqrt(0.25*auxTrain);
 
 		cout << "INFORME FINAL" << endl;
 		cout << "*************" << endl;
