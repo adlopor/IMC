@@ -458,14 +458,14 @@ void PerceptronMulticapa::ejecutarAlgoritmoOnline(Datos * pDatosTrain, Datos * p
 		pDatosValidacion->nNumSalidas = pDatosTrain->nNumSalidas;
 
 
-		//Reservamos memoria para las entradas
+		//Reservamos memoria para las entradas de test
 		pDatosValidacion->entradas=new double*[pDatosValidacion->nNumPatrones];
 		
 		for(int i = 0; i < pDatosValidacion->nNumPatrones; i++)
 			pDatosValidacion->entradas[i] = new double[pDatosValidacion->nNumEntradas];
 		
 		
-		//Reservamos memoria para las salidas
+		//Reservamos memoria para las salidas de test
 		pDatosValidacion->salidas=new double*[pDatosValidacion->nNumPatrones];
 		
 		for(int i = 0; i < pDatosValidacion->nNumPatrones; i++)
@@ -509,10 +509,10 @@ void PerceptronMulticapa::ejecutarAlgoritmoOnline(Datos * pDatosTrain, Datos * p
 	do {
 
 		entrenarOnline(pDatosTrain);
-		double trainError = test(pDatosTrain);
+		double trainError = test(pDatosTrain);//Calculamos MSE del entrenamiento.
 		
 		if(dValidacion > 0 && dValidacion < 1){
-			validationError = test(pDatosValidacion);
+			validationError = test(pDatosValidacion);//Calculamos MSE para validación.
 			
 			if(countTrain==0 || validationError < minValidationError){
 			

@@ -196,11 +196,19 @@ int main(int argc, char **argv) {
 		else{
 			mlp.dDecremento=1;
 		}
-
+		
 		//Lectura de datos de entrenamiento y test: llamar a mlp.leerDatos(...)
-		Datos * pDatosTrain=mlp.leerDatos(tvalue);
-		Datos * pDatosTest=mlp.leerDatos(Tvalue);
+		Datos * pDatosTrain = mlp.leerDatos(tvalue);
+		Datos * pDatosTest = NULL;
+		
+		if(Tflag==true){
+			pDatosTest = mlp.leerDatos(Tvalue);
+		}
 
+		else{
+			pDatosTest = mlp.leerDatos(tvalue);
+		}
+		
 		if(pDatosTrain==NULL or pDatosTest==NULL){
 				return EXIT_FAILURE;
 		}
@@ -264,8 +272,8 @@ int main(int argc, char **argv) {
 			auxTrain += pow(erroresTrain[i]-mediaErrorTrain,2);
 		}
 
-		desviacionTipicaErrorTest = sqrt(0.25*auxTest);
-		desviacionTipicaErrorTrain = sqrt(0.25*auxTrain);
+		desviacionTipicaErrorTest = sqrt(auxTest/4);
+		desviacionTipicaErrorTrain = sqrt(auxTrain/4);
 
 		cout << "INFORME FINAL" << endl;
 		cout << "*************" << endl;
