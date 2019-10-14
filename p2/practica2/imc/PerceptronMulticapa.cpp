@@ -23,6 +23,17 @@ using namespace util;
 // CONSTRUCTOR: Dar valor por defecto a todos los parámetros (dEta, dMu, dValidacion y dDecremento)
 PerceptronMulticapa::PerceptronMulticapa(){
 
+	//Variables privadas:
+	pCapas = NULL;
+	nNumCapas = 3;
+	nNumPatronesTrain = 0;
+	//Variables públicas:
+	dEta = 0.7;//Ponemos como valor por defecto para la tasa de aprendizaje un valor relativamente pequeño.
+	dMu = 1; //Empezamos poniendo un momento (inercia) incial, relativamente grande, para que no se estanque al principio de la ejecución y puedo explorar bien.
+	bOnline = false; //El aprendizaje será off-line por defecto.
+	dValidacion = 0; //El conjunto de datos es todo para entrenamiento, por defecto.
+	dDecremento = 1; //El factor de decremento por capas para la tasa de aprendizaje(dEta).
+	 
 }
 
 // ------------------------------
@@ -31,9 +42,43 @@ PerceptronMulticapa::PerceptronMulticapa(){
 // tipo contiene el tipo de cada capa (0 => sigmoide, 1 => softmax)
 // Rellenar vector Capa* pCapas
 int PerceptronMulticapa::inicializar(int nl, int npl[], int tipo[]) {
-	return 1;
-}
+	
+	if(nl >= 3){//Si hay más de tres capas(1 de entrada, + de 1 oculta y 1 de salida)
 
+		nNumCapas = nl;//Insertamos el número de capas del Perceptrón.
+		pCapas = new Capa[nNumCapas];//Generamos el vector de capas del Perceptrón.
+
+		for(int i=0; i<nNumCapas; i++){
+			
+			pCapas[i].nNumNeuronas = npl[i];//Se rellena la variable que contiene el número de neuronas de cada capa del Perceptrón. 
+			pCapas[i].pNeuronas = new Neurona[npl[i]];//Se reserva memoria para el vector que almacena las neuronas de cada capa.
+			pCapas[0].tipo = tipo[0];
+
+			for(int j=0; j<npl[i]; j++){
+
+				Neurona *nuevaNeurona = new Neurona;//Se crea una neurona nueva y a continuación se rellenará.
+				pCapas[i].pNeuronas[j] = *nuevaNeurona;//Se añade la neurona recién creada dentro de la capa actual.
+
+				if(i > 0){//Si nos encontramos en una capa distinta a la de entrada (ya que en esta las neuronas no reciben pesos), se rellenarán los pesos.
+					
+					//Se reserva memoria para cada peso de la neurona(teniendo en cuenta que hay un peso por cada neurona de la capa anterior y además el sesgo).
+					pCapas[i].pNeuronas[j].w = new double[pCapas[i-1].nNumNeuronas+1];
+					pCapas[i].pNeuronas[j].wCopia = new double[pCapas[i-1].nNumNeuronas+1];
+					pCapas[i].pNeuronas[j].deltaW = new double[pCapas[i-1].nNumNeuronas+1];
+					pCapas[i].pNeuronas[j].ultimoDeltaW = new double[pCapas[i-1].nNumNeuronas+1];
+
+				}
+			}
+		}
+		return 0;//Inicializa correctamente.
+	}
+
+	else{//Si el número de capas no es el adecuado.
+		printf("ERROR en PerceptronMulticapa.cpp : [FUNCION inicializar]. ERROR, el número de capas ha de ser mayor igual a 3 capas (una capa de entrada, una oculta y una de salida). Saliendo de la función...\n");
+		return 1;//No inicializa bien.
+	}
+	
+}
 
 // ------------------------------
 // DESTRUCTOR: liberar memoria
@@ -41,16 +86,52 @@ PerceptronMulticapa::~PerceptronMulticapa() {
 	liberarMemoria();
 }
 
-
 // ------------------------------
 // Liberar memoria para las estructuras de datos
 void PerceptronMulticapa::liberarMemoria() {
-
+for(int i=0; i<nNumCapas; i++){
+		
+		for(int j=0; j<pCapas[i].nNumNeuronas; j++){
+			
+			if(i!=0){//No es la capa de entrada
+			
+				//Borramos la memoria reservada en la función inicializar para los pesos.
+				delete pCapas[i].pNeuronas[j].deltaW;
+				delete pCapas[i].pNeuronas[j].ultimoDeltaW;
+				delete pCapas[i].pNeuronas[j].w;
+				delete pCapas[i].pNeuronas[j].wCopia;
+			
+			}
+		
+		}
+		
+		//Borramos la memoria reservada para el vector de neuronas.
+		delete pCapas[i].pNeuronas;
+			
+	}
+	//Borramos la memoria reservada para el vector de capas.
+	delete pCapas;
 }
 
 // ------------------------------
 // Rellenar todos los pesos (w) aleatoriamente entre -1 y 1
 void PerceptronMulticapa::pesosAleatorios() {
+
+for(int i=1; i<nNumCapas; i++){//Se recorre a partir de la primera capa oculta porque a la capa de entrada no le llegan pesos de una capa anterior, ya que es la primera de todas.
+
+		for(int j=0; j<pCapas[i].nNumNeuronas; j++){//Se recorren todas las neuronas de cada capa, a partir de la capa 1.
+
+			for(int k=0; k<pCapas[i-1].nNumNeuronas+1; k++){//Se generan todos los pesos que le llegan a cada neurona, que serían el número de neuronas de la capa anterior (ya que le llega un peso de cada neurona de la capa anterior) y el sesgo.
+
+				double w = ((double)rand()/RAND_MAX)* pow(-1,rand());//El peso que se genera está siempre entre -1 y +1.
+				//cout << "Pesos aleatorios w= "<<w<<"\tCapa: "<<i<<"\tNeurona: "<<j<<"\tPeso: "<<k<<endl;
+				
+				pCapas[i].pNeuronas[j].w[k] = w;//Se almacena el peso aleatorio generado.
+				
+			}
+		}
+	}
+}
 
 }
 
@@ -58,11 +139,23 @@ void PerceptronMulticapa::pesosAleatorios() {
 // Alimentar las neuronas de entrada de la red con un patrón pasado como argumento
 void PerceptronMulticapa::alimentarEntradas(double* input) {
 
+	for(int i=0; i < pCapas[0].nNumNeuronas; i++){//Rercorremos todas las neuronas de la Capa 0 (capa de entrada) del Perceptrón.
+
+		pCapas[0].pNeuronas[i].x = input[i];//Se rellena la salida que le llega a cada neurona de la Capa de Entrada del Perceptrón, (out).(Ver diapositiva 8 de la práctica).
+		//cout<<"pCapas[0].pNeuronas["<<i<<"].x: "<<pCapas[0].pNeuronas[i].x<<endl;
+	}
+
 }
 
 // ------------------------------
 // Recoger los valores predichos por la red (out de la capa de salida) y almacenarlos en el vector pasado como argumento
 void PerceptronMulticapa::recogerSalidas(double* output){
+
+	for(int i=0; i < pCapas[nNumCapas-1].nNumNeuronas; i++){//Recorremos cada neurona de la Capa N-ésima (Capa de Salida) del Perceptrón.
+
+		output[i] = pCapas[nNumCapas -1].pNeuronas[i].x;//Guardamos en el vector de salidas pasado por argumento, las salidas obtenidas de cada neurona.
+		//cout<<"output["<<i<<"]: "<<output[i]<<endl;
+	}
 
 }
 
@@ -70,17 +163,92 @@ void PerceptronMulticapa::recogerSalidas(double* output){
 // Hacer una copia de todos los pesos (copiar w en copiaW)
 void PerceptronMulticapa::copiarPesos() {
 
+	for(int i=1; i<nNumCapas; i++){//Recorremos el vector de capas del Perceptrón empezando desde la capa oculta, ya que la capa de entrada no tiene pesos.
+	
+		for(int j=0; j<pCapas[i].nNumNeuronas; j++){//Recorremos las neuronas de cada capa una a una para copiar los pesos que tiene cada una de las neuronas.
+	
+			for(int k=0; k<pCapas[i-1].nNumNeuronas+1; k++){//Recorremos los pesos de cada neurona que son equivalentes en número a las neuronas de la capa anterior más el sesgo. 
+	
+				pCapas[i].pNeuronas[j].wCopia[k] = pCapas[i].pNeuronas[j].w[k];//Se copian los pesos en la variable de copia.
+			}
+		}
+	}
 }
+
 
 // ------------------------------
 // Restaurar una copia de todos los pesos (copiar copiaW en w)
 void PerceptronMulticapa::restaurarPesos() {
 
+	for(int i=1; i<nNumCapas; i++){//Se recorren las capas del Perceptrón, (excepto la de entrada).
+	
+		for(int j=0; j<pCapas[i].nNumNeuronas; j++){//Se recorren las neuronas de cada capa.
+	
+			for(int k=0; k<pCapas[i-1].nNumNeuronas+1; k++){//Se recorren los pesos de cada neurona (numNeuronas de la capa anterior + 1(el sesgo).
+	
+				pCapas[i].pNeuronas[j].w[k] = pCapas[i].pNeuronas[j].wCopia[k];//Se almacena en la variable de los pesos, los pesos guardados en la variable de copia.
+	
+			}
+		}
+	}
 }
 
 // ------------------------------
 // Calcular y propagar las salidas de las neuronas, desde la primera capa hasta la última
 void PerceptronMulticapa::propagarEntradas() {
+
+	//Calculamos la salida de todos los nodos (neuronas), que sean de tipo Sigmoide.
+	for(int i=1; i<nNumCapas; i++){//Se recorren las todas las capas del Perceptrón una a una, (excepto la de entrada).
+	
+		for(int j=0; j<pCapas[i].nNumNeuronas; j++){//Se recorren todas las neuronas de cada capa recorrida.
+	
+			double sumaSigmoide = pCapas[i].pNeuronas[j].w[0];//Se inicializa con el sesgo 
+	
+			for(int k=0; k<pCapas[i-1].nNumNeuronas+1; k++){//Se recorren los pesos de cada neurona (numNeuronas de la capa anterior + 1(el sesgo).
+	
+			   sumaSigmoide += pCapas[i].pNeuronas[j].w[k+1] * pCapas[i-1].pNeuronas[k].x;//Se hace el Sumatorio de los pesos(excepto sesgo)*entrada de cada neurona.
+			}
+	
+			pCapas[i].pNeuronas[j].x = 1/(1+exp(-1*sumaSigmoide));//Se calcula el resto de la sigmoide y se guarda en la entrada de cada neurona.	
+		}
+	}
+	
+	//Si la última capa es de tipo Softmax:
+	if(pCapas[nNumCapas-1].tipo == 1){
+	
+		//Calculamos la función softmax para la última capa:
+		for(i=0; i<pCapas[nNumCapas-1].nNumneuronas; i++){
+			
+		}
+
+	}
+/*
+	//Si la ultima capa es de tipo softmax
+	if(pCapas[ultimaCapa].tipo == 1)
+	{
+		//Se calcula la función softmax para la última capa
+		for(int j=0; j<pCapas[ultimaCapa].nNumNeuronas; j++)
+		{
+			int posSesgo = pCapas[ultimaCapa].pNeuronas[j].w.size()-1;
+
+			pCapas[ultimaCapa].pNeuronas[j].x = 0.0;
+			pCapas[ultimaCapa].pNeuronas[j].x += pCapas[ultimaCapa].pNeuronas[j].w[posSesgo];
+
+			for(int i = 0; i<posSesgo; i++)
+			{
+				pCapas[ultimaCapa].pNeuronas[j].x += pCapas[ultimaCapa].pNeuronas[j].w[i]*pCapas[ultimaCapa-1].pNeuronas[i].x;
+			}
+
+			pCapas[ultimaCapa].pNeuronas[j].x = exp(pCapas[ultimaCapa].pNeuronas[j].x);
+			sumatorio += pCapas[ultimaCapa].pNeuronas[j].x;
+		}
+
+		for(int j=0; j<pCapas[ultimaCapa].nNumNeuronas; j++)
+		{
+			pCapas[ultimaCapa].pNeuronas[j].x = pCapas[ultimaCapa].pNeuronas[j].x/sumatorio;
+		}
+	}
+}*/
 
 }
 
