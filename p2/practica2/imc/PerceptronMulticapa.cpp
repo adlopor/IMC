@@ -14,6 +14,8 @@
 #include "PerceptronMulticapa.h"
 #include "util.h"
 
+#include <algorithm>
+
 using namespace imc;
 using namespace std;
 using namespace util;
@@ -199,64 +201,67 @@ void PerceptronMulticapa::propagarEntradas() {
 
 	//Calculamos la salida de todos los nodos (neuronas), que sean de tipo Sigmoide.
 	for(int i=1; i<nNumCapas; i++){//Se recorren las todas las capas del Perceptrón una a una, (excepto la de entrada).
+		if(pCapas[i].tipo==0){
+		
+			for(int j=0; j<pCapas[i].nNumNeuronas; j++){//Se recorren todas las neuronas de cada capa recorrida.
 	
-		for(int j=0; j<pCapas[i].nNumNeuronas; j++){//Se recorren todas las neuronas de cada capa recorrida.
+				double sumaSigmoide = pCapas[i].pNeuronas[j].w[0];//Se inicializa con el sesgo 
 	
-			double sumaSigmoide = pCapas[i].pNeuronas[j].w[0];//Se inicializa con el sesgo 
+				for(int k=0; k<pCapas[i-1].nNumNeuronas+1; k++){//Se recorren los pesos de cada neurona (numNeuronas de la capa anterior + 1(el sesgo).
 	
-			for(int k=0; k<pCapas[i-1].nNumNeuronas+1; k++){//Se recorren los pesos de cada neurona (numNeuronas de la capa anterior + 1(el sesgo).
+			   		sumaSigmoide += pCapas[i].pNeuronas[j].w[k+1] * pCapas[i-1].pNeuronas[k].x;//Se hace el Sumatorio de los pesos(excepto sesgo)*entrada de cada neurona.
+				}
 	
-			   sumaSigmoide += pCapas[i].pNeuronas[j].w[k+1] * pCapas[i-1].pNeuronas[k].x;//Se hace el Sumatorio de los pesos(excepto sesgo)*entrada de cada neurona.
+				pCapas[i].pNeuronas[j].x = 1/(1+exp(-1*sumaSigmoide));//Se calcula el resto de la sigmoide y se guarda en la entrada de cada neurona.	
 			}
-	
-			pCapas[i].pNeuronas[j].x = 1/(1+exp(-1*sumaSigmoide));//Se calcula el resto de la sigmoide y se guarda en la entrada de cada neurona.	
 		}
-	}
-	
-	//Si la última capa es de tipo Softmax:
-	if(pCapas[nNumCapas-1].tipo == 1){
-	
-		//Calculamos la función softmax para la última capa:
-		for(i=0; i<pCapas[nNumCapas-1].nNumneuronas; i++){
+		else{
+		
+			double sumaSoftMax = 0;
+			
+			for(int j=0; j<pCapas[i].nNumNeuronas; j++){//Se recorren todas las neuronas de cada capa recorrida.
+			
+				double sumaSigmoide = pCapas[i].pNeuronas[j].w[0];//Se inicializa con el sesgo
+				
+				for(int k=0;k<pCapas[i-1].nNumNeuronas+1;k++){//Se recorren los pesos de cada neurona (numNeuronas de la capa anterior + 1(el sesgo).
+				
+				   sumaSigmoide += pCapas[i].pNeuronas[j].w[k+1]*pCapas[i-1].pNeuronas[k].x;//Se hace el Sumatorio de los pesos(excepto sesgo)*entrada de cada neurona.
+				
+				}
+				
+				pCapas[i].pNeuronas[j].x = exp(sumaSigmoide);
+				
+				sumaSoftMax += pCapas[i].pNeuronas[j].x;
+			}
+			
+			for(int j=0; j<pCapas[i].nNumNeuronas; j++)
+				pCapas[i].pNeuronas[j].x = pCapas[i].pNeuronas[j].x / sumaSoftMax;
 			
 		}
-
 	}
-/*
-	//Si la ultima capa es de tipo softmax
-	if(pCapas[ultimaCapa].tipo == 1)
-	{
-		//Se calcula la función softmax para la última capa
-		for(int j=0; j<pCapas[ultimaCapa].nNumNeuronas; j++)
-		{
-			int posSesgo = pCapas[ultimaCapa].pNeuronas[j].w.size()-1;
-
-			pCapas[ultimaCapa].pNeuronas[j].x = 0.0;
-			pCapas[ultimaCapa].pNeuronas[j].x += pCapas[ultimaCapa].pNeuronas[j].w[posSesgo];
-
-			for(int i = 0; i<posSesgo; i++)
-			{
-				pCapas[ultimaCapa].pNeuronas[j].x += pCapas[ultimaCapa].pNeuronas[j].w[i]*pCapas[ultimaCapa-1].pNeuronas[i].x;
-			}
-
-			pCapas[ultimaCapa].pNeuronas[j].x = exp(pCapas[ultimaCapa].pNeuronas[j].x);
-			sumatorio += pCapas[ultimaCapa].pNeuronas[j].x;
-		}
-
-		for(int j=0; j<pCapas[ultimaCapa].nNumNeuronas; j++)
-		{
-			pCapas[ultimaCapa].pNeuronas[j].x = pCapas[ultimaCapa].pNeuronas[j].x/sumatorio;
-		}
-	}
-}*/
-
+	
 }
 
 // ------------------------------
 // Calcular el error de salida del out de la capa de salida con respecto a un vector objetivo y devolverlo
 // funcionError=1 => EntropiaCruzada // funcionError=0 => MSE
-double PerceptronMulticapa::calcularErrorSalida(double* target, int funcionError) {
-	return 0.0;
+double PerceptronMulticapa::calcularErrorSalida(double* objetivo, int funcionError) {
+
+	double error=0.0;
+	
+	if(funcionError == 0){//La función de error será la entropía cruzada.
+		for(int i=0; i<pCapas[nNumCapas-1]. nNumNeuronas; i++)
+			error += pow(objetivo[i]-pCapas[nNumCapas-1].pNeuronas[i].x,2);
+			
+		error = (double)error / pCapas[nNumCapas-1].nNumNeuronas;
+	}
+	else{//La función de error será el MSE.
+		for(int i=0; i<pCapas[nNumCapas-1].nNumNeuronas; i++)		
+			error += -1 * log(pCapas[nNumCapas-1].pNeuronas[i].x) * objetivo[i];
+		
+		error = (double)error/pCapas[nNumCapas-1].nNumNeuronas;
+	}
+	return error;
 }
 
 
