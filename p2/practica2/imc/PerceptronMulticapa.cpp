@@ -268,13 +268,111 @@ double PerceptronMulticapa::calcularErrorSalida(double* objetivo, int funcionErr
 // ------------------------------
 // Retropropagar el error de salida con respecto a un vector pasado como argumento, desde la última capa hasta la primera
 // funcionError=1 => EntropiaCruzada // funcionError=0 => MSE
-void PerceptronMulticapa::retropropagarError(double* objetivo, int funcionError) {
+void PerceptronMulticapa::retropropagarError(double* objetivo, int funcionError) {//Ver diferencia en las funciones de error respecto a si es SotfMax o Sigmoide. 
 
+	if(pCapas[nNumCapas-1].tipo == 0){//Comprobamos que el tipo de nodo de la capa de salida sea Sigmoide.
+	
+		if(funcionError == 0){//Si la función de error es MSE
+	
+			for(int i=0; i<pCapas[nNumCapas-1].nNumNeuronas; i++){//Recorremos todas la neuronas de la capa de salida.
+				
+				double out = pCapas[nNumCapas-1].pNeuronas[i].x;
+				pCapas[nNumCapas-1].pNeuronas[i].dX = -1 * (objetivo[i] - out) * (1 - out) * out;
+			}
+		}
+		
+		else{//Si la funcion de error es EntropiaCruzada.
+			for(int i=0; i<pCapas[nNumCapas-1].nNumNeuronas; i++){
+				
+					double out = pCapas[nNumCapas-1].pNeuronas[i].x;
+					pCapas[nNumCapas-1].pNeuronas[i].dX = -1 * (objetivo[i] / out) * (1 - out) * out;
+				}
+			}
+	}
+	else{//Si el tipo de nodo de la capa de salida es SoftMax.
+	
+			if(funcionError == 0){//Y la funcion error es MSE.
+			
+				for(int j=0; j<pCapas[nNumCapas-1].nNumNeuronas; j++){
+					
+					double sumaError=0.0;
+					
+					for(int i=0; i<pCapas[nNumCapas-1].nNumNeuronas; i++){
+						
+						double outj = pCapas[nNumCapas-1].pNeuronas[j].x;
+						double outi = pCapas[nNumCapas-1].pNeuronas[i].x;
+						
+						if(i!=j){
+							sumaError += -1 * (objetivo[i] - outi) * (-outi) * outj;
+						}
+						else{
+							sumaError += -1 * (objetivo[i] - outj) * (1 - outj) * outj;
+						}
+					}
+					
+					pCapas[nNumCapas-1].pNeuronas[j].dX = sumaError;
+				
+				}
+			}
+			else{//Si la funcion de error es EntropiaCruzada.
+			
+				for(int j=0; j<pCapas[nNumCapas-1].nNumNeuronas; j++){
+				
+					double sumaError=0.0;
+				
+					for(int i=0; i<pCapas[nNumCapas-1].nNumNeuronas; i++){
+					
+						double outj = pCapas[nNumCapas-1].pNeuronas[j].x;
+						double outi = pCapas[nNumCapas-1].pNeuronas[i].x;
+						
+						if(i!=j){
+							sumaError += -1 * (objetivo[i] / outi) * (-outi) * outj;
+						}
+						else{
+							sumaError += -1 *(objetivo[i] / outj) * (1 - outj) * outj;
+						}
+					}
+					
+					pCapas[nNumCapas-1].pNeuronas[j].dX = sumaError;
+				}
+			}
+	}
+    
+    for(int j=nNumCapas-2; j>=1; j--){//retropropagamos el error a partir de la última capa oculta hacia atrás.
+    
+    	for(int k=0; k<pCapas[j].nNumNeuronas; k++){
+    	
+    		double suma = 0.0;
+    		
+    		for(int l=0;l<pCapas[j+1].nNumNeuronas;l++){
+    		
+    			suma += pCapas[j+1].pNeuronas[l].dX*pCapas[j+1].pNeuronas[l].w[k+1];
+    		}
+    		
+    		double out = pCapas[j].pNeuronas[k].x;
+    		pCapas[j].pNeuronas[k].dX = suma * out * (1 - out);
+    	}
+    }
 }
 
 // ------------------------------
 // Acumular los cambios producidos por un patrón en deltaW
 void PerceptronMulticapa::acumularCambio() {
+
+	for(int i=1; i<nNumCapas; i++){
+	
+		for(int j=0; j<pCapas[i].nNumNeuronas; j++){
+    		for(int k=1; k<pCapas[i-1].nNumNeuronas+1; k++){
+    		
+    			pCapas[i].pNeuronas[j].ultimoDeltaW[k] = pCapas[i].pNeuronas[j].deltaW[k];
+    			pCapas[i].pNeuronas[j].deltaW[k] += pCapas[i].pNeuronas[j].dX * pCapas[i-1].pNeuronas[k-1].x;
+
+    		}
+    		
+			pCapas[i].pNeuronas[j].ultimoDeltaW[0] = pCapas[i].pNeuronas[j].deltaW[0];
+    		pCapas[i].pNeuronas[j].deltaW[0] += pCapas[i].pNeuronas[j].dX;
+		}
+	}
 
 }
 
@@ -282,12 +380,50 @@ void PerceptronMulticapa::acumularCambio() {
 // Actualizar los pesos de la red, desde la primera capa hasta la última
 void PerceptronMulticapa::ajustarPesos() {
 
+	double eta = dEta;
+	
+	for(int i=1; i<nNumCapas; i++){
+	
+		for(int j=0; j<pCapas[i].nNumNeuronas; j++){
+		
+    		for(int k=1; k<pCapas[i-1].nNumNeuronas+1; k++){
+    		
+    			if(!bOnline){
+    				pCapas[i].pNeuronas[j].w[k]=pCapas[i].pNeuronas[j].w[k]-((eta*pCapas[i].pNeuronas[j].deltaW[k])/nNumPatronesTrain)-((dMu*(eta*pCapas[i].pNeuronas[j].ultimoDeltaW[k]))/nNumPatronesTrain);
+    			}
+    			else{
+    				pCapas[i].pNeuronas[j].w[k]=pCapas[i].pNeuronas[j].w[k]-(eta*pCapas[i].pNeuronas[j].deltaW[k])-(dMu*(eta*pCapas[i].pNeuronas[j].ultimoDeltaW[k]));
+				}
+    		}
+    		
+			if(!bOnline){
+				pCapas[i].pNeuronas[j].w[0]=pCapas[i].pNeuronas[j].w[0]-((eta*pCapas[i].pNeuronas[j].deltaW[0])/nNumPatronesTrain)-((dMu*(eta*pCapas[i].pNeuronas[j].ultimoDeltaW[0]))/nNumPatronesTrain);
+			}
+			else{
+				pCapas[i].pNeuronas[j].w[0]=pCapas[i].pNeuronas[j].w[0]-(eta*pCapas[i].pNeuronas[j].deltaW[0])-(dMu*(eta*pCapas[i].pNeuronas[j].ultimoDeltaW[0]));
+			}
+		}
+		eta = pow(dDecremento,-(nNumCapas - i)) * eta;
+	}
 }
 
 // ------------------------------
 // Imprimir la red, es decir, todas las matrices de pesos
 void PerceptronMulticapa::imprimirRed() {
 
+	for(int i=1; i<nNumCapas; i++){
+	
+		cout<<"Capa "<<i<<endl<<"========"<<endl;
+		
+		for(int j=0; j<pCapas[i].nNumNeuronas; j++){
+		
+    		for(int k=0; k<pCapas[i-1].nNumNeuronas+1; k++){
+    		
+    			cout<<pCapas[i].pNeuronas[j].w[k]<<"\t";
+    		}
+    		cout<<endl;
+		}
+	}
 }
 
 // ------------------------------
