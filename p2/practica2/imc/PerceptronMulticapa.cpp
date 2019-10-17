@@ -432,7 +432,7 @@ void PerceptronMulticapa::imprimirRed() {
 // El paso de ajustar pesos solo deberá hacerse si el algoritmo es on-line
 // Si no lo es, el ajuste de pesos hay que hacerlo en la función "entrenar"
 // funcionError=1 => EntropiaCruzada // funcionError=0 => MSE
-void PerceptronMulticapa::simularRed(double* entrada, double* objetivo, int funcionError) {//Ver diapositivas XX práctica 1.
+void PerceptronMulticapa::simularRed(double* entrada, double* objetivo, int funcionError) {//Ver diapositivas práctica 1.
 	
 	alimentarEntradas(entrada);
 	propagarEntradas();
@@ -611,6 +611,7 @@ double PerceptronMulticapa::testClassification(Datos* pDatosTest) {
 // funcionError=1 => EntropiaCruzada // funcionError=0 => MSE
 void PerceptronMulticapa::ejecutarAlgoritmo(Datos * pDatosTrain, Datos * pDatosTest, int maxiter, double *errorTrain, double *errorTest, double *ccrTrain, double *ccrTest, int funcionError)
 {
+
 	int countTrain = 0;
 
 	// Inicialización de pesos
@@ -622,20 +623,82 @@ void PerceptronMulticapa::ejecutarAlgoritmo(Datos * pDatosTrain, Datos * pDatosT
 	nNumPatronesTrain = pDatosTrain->nNumPatrones;
 
 	Datos * pDatosValidacion = NULL;
-	double validationError = 0, previousValidationError = 0;
+	double validationError = 0;
+	double previousValidationError = 0;
 	int numSinMejorarValidacion = 0;
 
 	// Generar datos de validación
 	if(dValidacion > 0 && dValidacion < 1){
+		
+		int* vectordeelegidos = vectorAleatoriosEnterosSinRepeticion(0,pDatosTrain->nNumPatrones-1,round(pDatosTrain->nNumPatrones*dValidacion));
+		pDatosValidacion = new Datos;
+		pDatosValidacion->nNumPatrones = round(pDatosTrain->nNumPatrones*dValidacion);
+		pDatosValidacion->nNumEntradas = pDatosTrain->nNumEntradas;
+		pDatosValidacion->nNumSalidas = pDatosTrain->nNumSalidas;
 
-	}
+		pDatosValidacion->entradas = new double*[pDatosValidacion->nNumPatrones];
+		  
+		for(int i=0; i<pDatosValidacion->nNumPatrones; i++)
+			pDatosValidacion->entradas[i] = new double[pDatosValidacion->nNumEntradas];
+
+		pDatosValidacion->salidas = new double*[pDatosValidacion->nNumPatrones];
+		
+		for(int i=0; i<pDatosValidacion->nNumPatrones; i++)
+			pDatosValidacion->salidas[i] = new double[pDatosValidacion->nNumSalidas];
+
+		double** entrTrain = new double*[pDatosTrain->nNumPatrones-pDatosValidacion->nNumPatrones];
+			
+		for(int i=0; i<pDatosTrain->nNumPatrones-pDatosValidacion->nNumPatrones; i++)
+			entrTrain[i] = new double[pDatosTrain->nNumEntradas];
+
+		double** saliTrain = new double*[pDatosTrain->nNumPatrones-pDatosValidacion->nNumPatrones];
+		
+		for(int i=0; i<pDatosTrain->nNumPatrones-pDatosValidacion->nNumPatrones; i++)
+			saliTrain[i] = new double[pDatosTrain->nNumSalidas];
+
+		sort(vectordeelegidos, vectordeelegidos+pDatosValidacion->nNumPatrones);
+
+		for(int i=0, j=0, k=0; i<pDatosTrain->nNumPatrones; i++){
+			
+			if(i == vectordeelegidos[j]){
+			
+				pDatosValidacion->entradas[j] = pDatosTrain->entradas[i];
+				pDatosValidacion->salidas[j] = pDatosTrain->salidas[i];
+			
+				j++;
+			}
+			else{
+			
+				entrTrain[k] = pDatosTrain->entradas[i];
+				saliTrain[i] = pDatosTrain->salidas[i];
+				k++;
+			}
+		}
+		
+		pDatosTrain->nNumPatrones = pDatosTrain->nNumPatrones-pDatosValidacion->nNumPatrones;
+		pDatosTrain->salidas = saliTrain;
+		pDatosTrain->entradas = entrTrain;
+	
+	
+	}	
 
 	// Aprendizaje del algoritmo
 	do {
-
+	
 		entrenar(pDatosTrain,funcionError);
-
 		double trainError = test(pDatosTrain,funcionError);
+		
+		if(dValidacion > 0 && dValidacion < 1){
+			if(countTrain==0 || validationError < minValidationError){
+						minValidationError = validationError;
+						numSinMejorarValidacion = 0;
+					}
+					else if( (validationError-minValidationError) < 0.001)
+						numSinMejorarValidacion = 0;
+					else
+						numSinMejorarValidacion++;
+		}
+		
 		if(countTrain==0 || trainError < minTrainError){
 			minTrainError = trainError;
 			copiarPesos();
@@ -646,8 +709,14 @@ void PerceptronMulticapa::ejecutarAlgoritmo(Datos * pDatosTrain, Datos * pDatosT
 		else
 			numSinMejorar++;
 
-		if(numSinMejorar==50){
+		if(numSinMejorar>=50){
 			cout << "Salida porque no mejora el entrenamiento!!"<< endl;
+			restaurarPesos();
+			countTrain = maxiter;
+		}
+		
+		if(numSinMejorarValidacion>=50){
+			cout << "Salida porque no mejora el error de validación!!"<< endl;
 			restaurarPesos();
 			countTrain = maxiter;
 		}
