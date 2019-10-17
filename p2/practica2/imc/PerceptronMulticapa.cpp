@@ -135,8 +135,6 @@ for(int i=1; i<nNumCapas; i++){//Se recorre a partir de la primera capa oculta p
 	}
 }
 
-}
-
 // ------------------------------
 // Alimentar las neuronas de entrada de la red con un patrón pasado como argumento
 void PerceptronMulticapa::alimentarEntradas(double* input) {
@@ -484,7 +482,7 @@ void PerceptronMulticapa::entrenar(Datos* pDatosTrain, int funcionError) {
 	if(bOnline){//Si se entrena on-line
 		for(int r=0; r<pDatosTrain->nNumPatrones; r++){
 			for(int i=1; i<this->nNumCapas; i++){
-				for(int j=0; j this->pCapas[i].nNumNeuronas; j++){
+				for(int j=0; j<this->pCapas[i].nNumNeuronas; j++){
 					for(int k=0; k<this->pCapas[i-1].nNumNeuronas+1; k++){
 			
 						this->pCapas[i].pNeuronas[j].deltaW[k] = 0.0;
@@ -557,7 +555,7 @@ void PerceptronMulticapa::predecir(Datos* pDatosTest)
 
 // ------------------------------
 // Probar la red con un conjunto de datos y devolver el CCR
-double PerceptronMulticapa::testClassification(Datos* pDatosTest) {
+double PerceptronMulticapa::testClassification(Datos* pDatosTest, int ** matrizConf) {
 
 	double ccr = 0.0;
 	
@@ -609,7 +607,7 @@ double PerceptronMulticapa::testClassification(Datos* pDatosTest) {
 // Una vez terminado, probar como funciona la red en pDatosTest
 // Tanto el error MSE de entrenamiento como el error MSE de test debe calcularse y almacenarse en errorTrain y errorTest
 // funcionError=1 => EntropiaCruzada // funcionError=0 => MSE
-void PerceptronMulticapa::ejecutarAlgoritmo(Datos * pDatosTrain, Datos * pDatosTest, int maxiter, double *errorTrain, double *errorTest, double *ccrTrain, double *ccrTest, int funcionError)
+void PerceptronMulticapa::ejecutarAlgoritmo(Datos * pDatosTrain, Datos * pDatosTest, int maxiter, double *errorTrain, double *errorTest, double *ccrTrain, double *ccrTest, int funcionError, int** matrizConf)
 {
 
 	int countTrain = 0;
@@ -621,10 +619,12 @@ void PerceptronMulticapa::ejecutarAlgoritmo(Datos * pDatosTrain, Datos * pDatosT
 	int numSinMejorar = 0;
 	double testError = 0;
 	nNumPatronesTrain = pDatosTrain->nNumPatrones;
-
+	
 	Datos * pDatosValidacion = NULL;
 	double validationError = 0;
-	double previousValidationError = 0;
+	//Esta varibale no la uso.
+	//double previousValidationError = 0;
+	double minValidationError = 0;
 	int numSinMejorarValidacion = 0;
 
 	// Generar datos de validación
@@ -755,8 +755,8 @@ void PerceptronMulticapa::ejecutarAlgoritmo(Datos * pDatosTrain, Datos * pDatosT
 
 	*errorTest=test(pDatosTest,funcionError);;
 	*errorTrain=minTrainError;
-	*ccrTest = testClassification(pDatosTest);
-	*ccrTrain = testClassification(pDatosTrain);
+	*ccrTest = testClassification(pDatosTest, matrizConf);
+	*ccrTrain = testClassification(pDatosTrain, matrizConf);
 
 }
 

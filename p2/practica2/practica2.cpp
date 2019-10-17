@@ -48,6 +48,7 @@ int main(int argc, char **argv) {
                 Tflag = true;
                 Tvalue = optarg;
                 break;
+                
 			case 'i':
                 iflag = true;
                 ivalue = optarg;
@@ -59,49 +60,49 @@ int main(int argc, char **argv) {
                 break;
             
             case 'h':
-                lflag = true;
-                lvalue = optarg;
+                hflag = true;
+                hvalue = optarg;
                 break;
                 
             case 'e':
-                lflag = true;
-                lvalue = optarg;
+                eflag = true;
+                evalue = optarg;
                 break;
             
             case 'm':
-                lflag = true;
-                lvalue = optarg;
+                mflag = true;
+                mvalue = optarg;
                 break;
                 
             case 'v':
-                lflag = true;
-                lvalue = optarg;
+                vflag = true;
+                vvalue = optarg;
                 break;
                 
             case 'd':
-                pflag = true;
+                dflag = true;
                 break;
             
             case 'o':
-                lflag = true;
+                oflag = true;
                 break;
                 
             case 'f':
-                lflag = true;
-                lvalue = optarg;
+                fflag = true;
+                fvalue = optarg;
                 break;
                 
             case 's':
-                lflag = true;
+                sflag = true;
                 break;
             
             case 'w':
-                lflag = true;
-                lvalue = optarg;
+                wflag = true;
+                wvalue = optarg;
                 break;
             
             case 'p':
-                lflag = true;
+                pflag = true;
                 break;
             
             case '?':
@@ -134,7 +135,7 @@ int main(int argc, char **argv) {
     	
 
 		if (!tflag){
-              fprintf (stderr, "La opción -t es necesaría para la ejecución.\n");
+              fprintf (stderr, "La opción -t es necesaria para la ejecución.\n");
               return EXIT_FAILURE;
         }
         
@@ -197,18 +198,30 @@ int main(int argc, char **argv) {
 			mlp.dDecremento=1;
 		}
 		if(fflag==true){
-			error = atof(dvalue);
+			error = atof(fvalue);
 		}
 
 		else{
 			error = 0;
 		}
 		
-		mlp.bonline = oflag;
+		mlp.bOnline = oflag;
 		
 		// Lectura de datos de entrenamiento y test: llamar a mlp.leerDatos(...)
-		Datos* pDatosTrain = mlp.leerDatos(tvalue);
-        Datos* pDatosTest = mlp.leerDatos(Tvalue);
+		Datos * pDatosTrain = mlp.leerDatos(tvalue);
+		Datos * pDatosTest = NULL;
+		
+		if(Tflag==true){
+			pDatosTest = mlp.leerDatos(Tvalue);
+		}
+
+		else{
+			pDatosTest = mlp.leerDatos(tvalue);
+		}
+		
+		if(pDatosTrain==NULL or pDatosTest==NULL){
+				return EXIT_FAILURE;
+		}
 		
 		// Inicializar vector topología
     	int *topologia = new int[capas+2];
@@ -219,7 +232,7 @@ int main(int argc, char **argv) {
     	tipoCapas[0] = 0;
     	
     	//Capas ocultas
-    	for(int i=1; i<(capas+2-1); i++)
+    	for(int i=1; i<(capas+2-1); i++){
     		
     		tipoCapas[i] = 0;
     	  	topologia[i] = neuronas;
@@ -247,6 +260,7 @@ int main(int argc, char **argv) {
         int semillas[] = {1,2,3,4,5};
         double *errores = new double[5];
         double *erroresTrain = new double[5];
+        double *erroresTest = new double[5];
         double *ccrs = new double[5];
         double *ccrsTrain = new double[5];
         double mejorErrorTest = 1.0;
@@ -268,9 +282,8 @@ int main(int argc, char **argv) {
 
         }
 
-
-        double mediaError = 0, desviacionTipicaError = 0;
         double mediaErrorTrain = 0, desviacionTipicaErrorTrain = 0;
+        double mediaErrorTest = 0, desviacionTipicaErrorTest = 0;
         double mediaCCR = 0, desviacionTipicaCCR = 0;
         double mediaCCRTrain = 0, desviacionTipicaCCRTrain = 0;
 
@@ -306,14 +319,14 @@ int main(int argc, char **argv) {
 		desviacionTipicaCCRTrain= sqrt(auxCCRTrain/4);
 		desviacionTipicaCCR = sqrt(auxCCRTest/4);
 		desviacionTipicaErrorTest = sqrt(auxTest/4);
-		desviacionTipicaErrorTrain = sqrt(auxTrain/4)
+		desviacionTipicaErrorTrain = sqrt(auxTrain/4);
 
         cout << "HEMOS TERMINADO TODAS LAS SEMILLAS" << endl;
 
     	cout << "INFORME FINAL" << endl;
     	cout << "*************" << endl;
         cout << "Error de entrenamiento (Media +- DT): " << mediaErrorTrain << " +- " << desviacionTipicaErrorTrain << endl;
-        cout << "Error de test (Media +- DT): " << mediaError << " +- " << desviacionTipicaError << endl;
+        cout << "Error de test (Media +- DT): " << mediaErrorTest << " +- " << desviacionTipicaErrorTest << endl;
         cout << "CCR de entrenamiento (Media +- DT): " << mediaCCRTrain << " +- " << desviacionTipicaCCRTrain << endl;
         cout << "CCR de test (Media +- DT): " << mediaCCR << " +- " << desviacionTipicaCCR << endl;
         
@@ -324,7 +337,7 @@ int main(int argc, char **argv) {
         	cout << "|";
         
         	for(int j=0; j<pDatosTrain->nNumSalidas; j++){
-        		cout << " " << matrizconf[i][j];
+        		cout << " " << matrizConf[i][j];
         	}
         	
         	cout << " |" << endl;
