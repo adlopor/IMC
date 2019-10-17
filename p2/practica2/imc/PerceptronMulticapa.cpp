@@ -432,14 +432,46 @@ void PerceptronMulticapa::imprimirRed() {
 // El paso de ajustar pesos solo deberá hacerse si el algoritmo es on-line
 // Si no lo es, el ajuste de pesos hay que hacerlo en la función "entrenar"
 // funcionError=1 => EntropiaCruzada // funcionError=0 => MSE
-void PerceptronMulticapa::simularRed(double* entrada, double* objetivo, int funcionError) {
-
+void PerceptronMulticapa::simularRed(double* entrada, double* objetivo, int funcionError) {//Ver diapositivas XX práctica 1.
+	
+	alimentarEntradas(entrada);
+	propagarEntradas();
+	retropropagarError(objetivo,funcionError);
+	acumularCambio();
+	if(bOnline){
+		ajustarPesos();
+	}
 }
 
 // ------------------------------
 // Leer una matriz de datos a partir de un nombre de fichero y devolverla
 Datos* PerceptronMulticapa::leerDatos(const char *archivo) {
+	
 	Datos * pDatos = new Datos;
+	ifstream fichero (archivo);
+	
+	fichero>>pDatos->nNumEntradas>>pDatos->nNumSalidas>>pDatos->nNumPatrones;
+
+	pDatos->entradas=new double*[pDatos->nNumPatrones];
+	
+	for(int i=0; i<pDatos->nNumPatrones; i++)
+		pDatos->entradas[i] = new double[pDatos->nNumEntradas];
+		
+	pDatos->salidas=new double*[pDatos->nNumPatrones];
+	
+	for(int i=0; i<pDatos->nNumPatrones; i++)
+		pDatos->salidas[i] = new double[pDatos->nNumSalidas];
+
+	for(int i=0; i<pDatos->nNumPatrones; i++){
+		for(int j=0;j<pDatos->nNumEntradas;j++){
+			
+			fichero>>pDatos->entradas[i][j];
+		}
+	
+		for(int k=0; k<pDatos->nNumSalidas; k++)
+			fichero>>pDatos->salidas[i][k];
+
+	}
 
 	return pDatos;
 }
@@ -449,14 +481,50 @@ Datos* PerceptronMulticapa::leerDatos(const char *archivo) {
 // Entrenar la red para un determinado fichero de datos (pasar una vez por todos los patrones)
 void PerceptronMulticapa::entrenar(Datos* pDatosTrain, int funcionError) {
 
+	if(bOnline){//Si se entrena on-line
+		for(int r=0; r<pDatosTrain->nNumPatrones; r++){
+			for(int i=1; i<this->nNumCapas; i++){
+				for(int j=0; j this->pCapas[i].nNumNeuronas; j++){
+					for(int k=0; k<this->pCapas[i-1].nNumNeuronas+1; k++){
+			
+						this->pCapas[i].pNeuronas[j].deltaW[k] = 0.0;
+					}
+				}
+			}
+			simularRed(pDatosTrain->entradas[r],pDatosTrain->salidas[r],funcionError);
+		}
+	}
+	else{//Si se entrena off-line
+		for(int i=1; i<this->nNumCapas; i++){
+			for(int j=0; j<this->pCapas[i].nNumNeuronas; j++){
+				for(int k=0; k<this->pCapas[i-1].nNumNeuronas+1; k++){
+			
+					this->pCapas[i].pNeuronas[j].deltaW[k] = 0.0;
+				}
+			}
+		}
+		for(int r=0; r<pDatosTrain->nNumPatrones; r++)
+			simularRed(pDatosTrain->entradas[r],pDatosTrain->salidas[r],funcionError);
+		
+		ajustarPesos();
+
+	}
 }
 
 // ------------------------------
 // Probar la red con un conjunto de datos y devolver el error cometido
 // funcionError=1 => EntropiaCruzada // funcionError=0 => MSE
 double PerceptronMulticapa::test(Datos* pDatosTest, int funcionError) {
+	
+	double mse=0.0;
+	for(int i=0; i<pDatosTest->nNumPatrones; i++){
 
-	return 0.0;
+		alimentarEntradas(pDatosTest->entradas[i]);
+		propagarEntradas();
+		mse += calcularErrorSalida(pDatosTest->salidas[i],funcionError);
+	}
+	
+	return (mse / pDatosTest->nNumPatrones);
 }
 
 // OPCIONAL - KAGGLE
@@ -491,7 +559,49 @@ void PerceptronMulticapa::predecir(Datos* pDatosTest)
 // Probar la red con un conjunto de datos y devolver el CCR
 double PerceptronMulticapa::testClassification(Datos* pDatosTest) {
 
-	return 0.0;
+	double ccr = 0.0;
+	
+	int numSalidas = pCapas[nNumCapas-1].nNumNeuronas;
+
+	if(matrizConf != NULL){
+	
+		for(int i=0; i<numSalidas; i++)
+			for(int k=0; k<numSalidas; k++)
+				matrizConf[i][k] = 0;
+	}
+	
+	double * salidas = new double[numSalidas];
+	for(int i=0; i<pDatosTest->nNumPatrones; i++){
+		
+		alimentarEntradas(pDatosTest->entradas[i]);
+		propagarEntradas();
+		recogerSalidas(salidas);
+
+		double mayor = salidas[0];
+		int indiceMayor = 0;
+		
+		for(int j=1; j<numSalidas; j++){
+			
+			if(mayor < salidas[j]){
+				mayor = salidas[j];
+				indiceMayor = j;
+			}
+		}
+		if(pDatosTest->salidas[i][indiceMayor] == 1){
+			ccr++;
+		}
+		if(matrizConf != NULL){
+			
+			int j=0;
+			for(int k=0; k<numSalidas; k++){
+				if(pDatosTest->salidas[i][k] == 1)
+					j=k;
+			}
+			matrizConf[indiceMayor][j]++;
+		}
+	}
+	
+	return ((ccr / pDatosTest->nNumPatrones) * 100);
 }
 
 // ------------------------------
