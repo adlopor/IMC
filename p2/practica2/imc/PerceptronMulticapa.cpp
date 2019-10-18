@@ -535,7 +535,7 @@ void PerceptronMulticapa::predecir(Datos* pDatosTest)
 	int numSalidas = pCapas[nNumCapas-1].nNumNeuronas;
 	double * salidas = new double[numSalidas];
 	
-	cout << "Id,Predicted" << endl;
+	cout << "Id,Category" << endl;
 	
 	for (i=0; i<pDatosTest->nNumPatrones; i++){
 
@@ -548,7 +548,7 @@ void PerceptronMulticapa::predecir(Datos* pDatosTest)
 			if (salidas[j] >= salidas[maxIndex])
 				maxIndex = j;
 		
-		cout << i << "," << maxIndex << endl;
+		cout << i << "," << maxIndex << "," << endl;
 
 	}
 }
@@ -704,7 +704,7 @@ void PerceptronMulticapa::ejecutarAlgoritmo(Datos * pDatosTrain, Datos * pDatosT
 			copiarPesos();
 			numSinMejorar = 0;
 		}
-		else if( (trainError-minTrainError) < 0.00001)
+		else if( (trainError-minTrainError) < 0.001)//Se reduce para que haga más ejecuciones y no se salga tan rápido.	
 			numSinMejorar = 0;
 		else
 			numSinMejorar++;

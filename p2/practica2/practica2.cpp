@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 
     // a: opción que requiere un argumento
     // a:: el argumento requerido es opcional
-    while ((c = getopt(argc, argv, "t:T:i:l:h:e:m:v:d:o:f:s:w:p")) != -1)
+    while ((c = getopt(argc, argv, "t:T:i:l:h:e:m:v:d:of:sw:p")) != -1)
     {
         // Se han añadido los parámetros necesarios para usar el modo opcional de predicción (kaggle).
         // Añadir el resto de parámetros que sean necesarios para la parte básica de las prácticas.
@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
                 break;
             
             case '?':
-                if (optopt == 't' || optopt == 'T' || optopt == 'i' || optopt == 'l' ||optopt == 'h' || optopt == 'e' || optopt == 'm' || optopt == 'v' || optopt == 'd' || optopt == 'o' || optopt == 'f' || optopt == 's' || optopt == 'w' || optopt == 'p')
+                if (optopt == 't' || optopt == 'T' || optopt == 'i' || optopt == 'l' ||optopt == 'h' || optopt == 'e' || optopt == 'm' || optopt == 'v' || optopt == 'd' || optopt == 'f' || optopt == 'w')
                     fprintf (stderr, "La opción -%c requiere un argumento.\n", optopt);
                 else if (isprint (optopt))
                     fprintf (stderr, "Opción desconocida `-%c'.\n", optopt);
