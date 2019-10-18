@@ -1,0 +1,6 @@
+./practica2 -t /home/adrian/Escritorio/IMC/p2/imc1920p1/train.dat -T /home/adrian/Escritorio/IMC/p2/imc1920p1/test.dat -i 5000 -w pesosi5K.txt
+./practica2 -t /home/adrian/Escritorio/IMC/p2/imc1920p1/train.dat -T /home/adrian/Escritorio/IMC/p2/imc1920p1/test_kaggle.dat -i 5000 -w pesosi5K.txt -p>resultadoi5K.csv
+
+//Para ver si nosobreentrena, multiplicamos por 10 las iteraciones:
+./practica2 -t /home/adrian/Escritorio/IMC/p2/imc1920p1/train.dat -T /home/adrian/Escritorio/IMC/p2/imc1920p1/test.dat -i 50000 -w pesosi50K.txt
+./practica2 -t /home/adrian/Escritorio/IMC/p2/imc1920p1/train.dat -T /home/adrian/Escritorio/IMC/p2/imc1920p1/test_kaggle.dat -i 50000 -w pesosi50K.txt -p>resultadoi50K.csv
