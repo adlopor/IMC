@@ -411,15 +411,15 @@ void PerceptronMulticapa::imprimirRed() {
 
 	for(int i=1; i<nNumCapas; i++){
 	
-		cout<<"Capa "<<i<<endl<<"========"<<endl;
+		//cout<<"Capa "<<i<<endl<<"========"<<endl;
 		
 		for(int j=0; j<pCapas[i].nNumNeuronas; j++){
 		
     		for(int k=0; k<pCapas[i-1].nNumNeuronas+1; k++){
     		
-    			cout<<pCapas[i].pNeuronas[j].w[k]<<"\t";
+    			//cout<<pCapas[i].pNeuronas[j].w[k]<<"\t";
     		}
-    		cout<<endl;
+    		//cout<<endl;
 		}
 	}
 }
@@ -710,13 +710,13 @@ void PerceptronMulticapa::ejecutarAlgoritmo(Datos * pDatosTrain, Datos * pDatosT
 			numSinMejorar++;
 
 		if(numSinMejorar>=50){
-			cout << "Salida porque no mejora el entrenamiento!!"<< endl;
+			//cout << "Salida porque no mejora el entrenamiento!!"<< endl;
 			restaurarPesos();
 			countTrain = maxiter;
 		}
 		
 		if(numSinMejorarValidacion>=50){
-			cout << "Salida porque no mejora el error de validación!!"<< endl;
+			//cout << "Salida porque no mejora el error de validación!!"<< endl;
 			restaurarPesos();
 			countTrain = maxiter;
 		}
@@ -726,19 +726,19 @@ void PerceptronMulticapa::ejecutarAlgoritmo(Datos * pDatosTrain, Datos * pDatosT
 
 		// Comprobar condiciones de parada de validación y forzar
 
-		cout << "Iteración " << countTrain << "\t Error de entrenamiento: " << trainError << "\t Error de test: " << testError << "\t Error de validacion: " << validationError << endl;
+		//cout << "Iteración " << countTrain << "\t Error de entrenamiento: " << trainError << "\t Error de test: " << testError << "\t Error de validacion: " << validationError << endl;
 
 	} while ( countTrain<maxiter );
 
 	if ( (numSinMejorarValidacion!=50) && (numSinMejorar!=50))
 		restaurarPesos();
 
-	cout << "PESOS DE LA RED" << endl;
-	cout << "===============" << endl;
+	//cout << "PESOS DE LA RED" << endl;
+	//cout << "===============" << endl;
 	imprimirRed();
 
-	cout << "Salida Esperada Vs Salida Obtenida (test)" << endl;
-	cout << "=========================================" << endl;
+	//cout << "Salida Esperada Vs Salida Obtenida (test)" << endl;
+	//cout << "=========================================" << endl;
 	for(int i=0; i<pDatosTest->nNumPatrones; i++){
 		double* prediccion = new double[pDatosTest->nNumSalidas];
 
@@ -746,11 +746,11 @@ void PerceptronMulticapa::ejecutarAlgoritmo(Datos * pDatosTrain, Datos * pDatosT
 		alimentarEntradas(pDatosTest->entradas[i]);
 		propagarEntradas();
 		recogerSalidas(prediccion);
-		for(int j=0; j<pDatosTest->nNumSalidas; j++)
+		/*for(int j=0; j<pDatosTest->nNumSalidas; j++)
 			cout << pDatosTest->salidas[i][j] << " -- " << prediccion[j] << " \\\\ " ;
 		cout << endl;
 		delete[] prediccion;
-
+		*/
 	}
 
 	*errorTest=test(pDatosTest,funcionError);;

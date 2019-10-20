@@ -258,7 +258,7 @@ int main(int argc, char **argv) {
         	
         // Semilla de los números aleatorios
         int semillas[] = {1,2,3,4,5};
-        double *errores = new double[5];
+        //double *errores = new double[5];
         double *erroresTrain = new double[5];
         double *erroresTest = new double[5];
         double *ccrs = new double[5];
@@ -266,12 +266,12 @@ int main(int argc, char **argv) {
         double mejorErrorTest = 1.0;
         
         for(int i=0; i<5; i++){
-        	cout << "**********" << endl;
-        	cout << "SEMILLA " << semillas[i] << endl;
-        	cout << "**********" << endl;
+        	//cout << "**********" << endl;
+        	//cout << "SEMILLA " << semillas[i] << endl;
+        	//cout << "**********" << endl;
     		srand(semillas[i]);
-    		mlp.ejecutarAlgoritmo(pDatosTrain, pDatosTest, iteraciones, &(erroresTrain[i]), &(errores[i]), &(ccrsTrain[i]), &(ccrs[i]), error, matrizConf);
-    		cout << "Finalizamos => CCR de test final: " << ccrs[i] << endl;
+    		mlp.ejecutarAlgoritmo(pDatosTrain, pDatosTest, iteraciones, &(erroresTrain[i]), &(erroresTest[i]), &(ccrsTrain[i]), &(ccrs[i]), error, matrizConf);
+    		//cout << "Finalizamos => CCR de test final: " << ccrs[i] << endl;
 
             // (Opcional - Kaggle) Guardamos los pesos cada vez que encontremos un modelo mejor.
             if(wflag && erroresTest[i] <= mejorErrorTest)
@@ -321,16 +321,19 @@ int main(int argc, char **argv) {
 		desviacionTipicaErrorTest = sqrt(auxTest/4);
 		desviacionTipicaErrorTrain = sqrt(auxTrain/4);
 
-        cout << "HEMOS TERMINADO TODAS LAS SEMILLAS" << endl;
+        //cout << "HEMOS TERMINADO TODAS LAS SEMILLAS" << endl;
 
-    	cout << "INFORME FINAL" << endl;
-    	cout << "*************" << endl;
-        cout << "Error de entrenamiento (Media +- DT): " << mediaErrorTrain << " +- " << desviacionTipicaErrorTrain << endl;
-        cout << "Error de test (Media +- DT): " << mediaErrorTest << " +- " << desviacionTipicaErrorTest << endl;
-        cout << "CCR de entrenamiento (Media +- DT): " << mediaCCRTrain << " +- " << desviacionTipicaCCRTrain << endl;
-        cout << "CCR de test (Media +- DT): " << mediaCCR << " +- " << desviacionTipicaCCR << endl;
+    	//cout << "INFORME FINAL" << endl;
+    	//cout << "*************" << endl;
+        //cout << "Error de entrenamiento (Media +- DT): " << mediaErrorTrain << " +- " << desviacionTipicaErrorTrain << endl;
+        //cout << "Error de test (Media +- DT): " << mediaErrorTest << " +- " << desviacionTipicaErrorTest << endl;
+        //cout << "CCR de entrenamiento (Media +- DT): " << mediaCCRTrain << " +- " << desviacionTipicaCCRTrain << endl;
+        //cout << "CCR de test (Media +- DT): " << mediaCCR << " +- " << desviacionTipicaCCR << endl;
+        
+        cout << mediaErrorTrain << ";" << desviacionTipicaErrorTrain << ";" << mediaErrorTest << ";" << desviacionTipicaErrorTest << ";" << mediaCCRTrain << ";" << desviacionTipicaCCRTrain << ";" << mediaCCR << ";" << desviacionTipicaCCR << endl;
         
         //Añadimos a la salida la matriz de confusion obtenida.
+        /*
         cout << "Matriz de confusión" << endl;
         for(int i=0; i<pDatosTrain->nNumSalidas; i++){
         
@@ -342,6 +345,7 @@ int main(int argc, char **argv) {
         	
         	cout << " |" << endl;
         }
+        */
         
     	return EXIT_SUCCESS;
     }
