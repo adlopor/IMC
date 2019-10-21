@@ -81,6 +81,7 @@ int main(int argc, char **argv) {
                 
             case 'd':
                 dflag = true;
+                dvalue = optarg;
                 break;
             
             case 'o':
@@ -238,6 +239,7 @@ int main(int argc, char **argv) {
     	  	topologia[i] = neuronas;
     	}
     	
+    	//Capa de salida
     	topologia[capas+2-1] = pDatosTrain->nNumSalidas;
 
 		if(sflag){
@@ -257,7 +259,7 @@ int main(int argc, char **argv) {
         	matrizConf[i] = new int[pDatosTrain->nNumSalidas];
         	
         // Semilla de los números aleatorios
-        int semillas[] = {1,2,3,4,5};
+        int semillas[] = {1};
         //double *errores = new double[5];
         double *erroresTrain = new double[5];
         double *erroresTest = new double[5];
@@ -265,7 +267,7 @@ int main(int argc, char **argv) {
         double *ccrsTrain = new double[5];
         double mejorErrorTest = 1.0;
         
-        for(int i=0; i<5; i++){
+        for(int i=0; i<1; i++){
         	//cout << "**********" << endl;
         	//cout << "SEMILLA " << semillas[i] << endl;
         	//cout << "**********" << endl;
@@ -287,8 +289,18 @@ int main(int argc, char **argv) {
         double mediaCCR = 0, desviacionTipicaCCR = 0;
         double mediaCCRTrain = 0, desviacionTipicaCCRTrain = 0;
 
+		/*-----------CHIVATO CCRS---------------*/
+		/*cout << "Chivato de los CCRs:" << endl;
+		for (int i=0; i<5; i++){
+			
+			cout << "CCRTest[ " << i << " ]: " << ccrs[i] << endl;
+			cout << "CCRTrain[ " << i << " ]: " << ccrsTrain[i] << endl;
+			
+		}*/
+		
+		
         // Calcular medias y desviaciones típicas de entrenamiento y test
-		for(int i=0; i<5; i++){
+		for(int i=0; i<1; i++){
 		
 			mediaCCR += ccrs[i];
 			mediaCCRTrain += ccrsTrain[i];
@@ -330,17 +342,19 @@ int main(int argc, char **argv) {
         //cout << "CCR de entrenamiento (Media +- DT): " << mediaCCRTrain << " +- " << desviacionTipicaCCRTrain << endl;
         //cout << "CCR de test (Media +- DT): " << mediaCCR << " +- " << desviacionTipicaCCR << endl;
         
-        cout << mediaErrorTrain << ";" << desviacionTipicaErrorTrain << ";" << mediaErrorTest << ";" << desviacionTipicaErrorTest << ";" << mediaCCRTrain << ";" << desviacionTipicaCCRTrain << ";" << mediaCCR << ";" << desviacionTipicaCCR << endl;
-        
-        //Añadimos a la salida la matriz de confusion obtenida.
         /*
-        cout << "Matriz de confusión" << endl;
+        cout << mediaErrorTrain << ";" << desviacionTipicaErrorTrain << ";" << mediaErrorTest << ";" << desviacionTipicaErrorTest << ";" << mediaCCRTrain << ";" << desviacionTipicaCCRTrain << ";" << mediaCCR << ";" << desviacionTipicaCCR << endl;
+        */
+      	
+        //Añadimos a la salida la matriz de confusion obtenida.
+        
+       /* cout << "Matriz de confusión" << endl;
         for(int i=0; i<pDatosTrain->nNumSalidas; i++){
         
         	cout << "|";
         
         	for(int j=0; j<pDatosTrain->nNumSalidas; j++){
-        		cout << " " << matrizConf[i][j];
+        		cout << " " << matrizConf[j][i];
         	}
         	
         	cout << " |" << endl;

@@ -1,0 +1,5 @@
+Arquitectura,Media Er. Train,Desv. T. Er. Train,Media Er. Test,Desv. T. Er. Test
+{n:16:k},0.00863582,0.000271544,0.0314505,0.00186827
+,,,,
+Arquitectura,Media CCR Train,Desv. T. CCR Train,Media CCR Test,Desv. T. CCR Test
+{n:16:k},99.0798,0,95.7798,0.820575

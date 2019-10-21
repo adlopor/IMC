@@ -563,12 +563,15 @@ double PerceptronMulticapa::testClassification(Datos* pDatosTest, int ** matrizC
 
 	if(matrizConf != NULL){
 	
-		for(int i=0; i<numSalidas; i++)
-			for(int k=0; k<numSalidas; k++)
+		for(int i=0; i<numSalidas; i++){
+			for(int k=0; k<numSalidas; k++){//Inicializamos la matriz de confusión con todos sus valores a cero.
 				matrizConf[i][k] = 0;
+			}
+		}
 	}
 	
 	double * salidas = new double[numSalidas];
+	
 	for(int i=0; i<pDatosTest->nNumPatrones; i++){
 		
 		alimentarEntradas(pDatosTest->entradas[i]);
@@ -585,9 +588,11 @@ double PerceptronMulticapa::testClassification(Datos* pDatosTest, int ** matrizC
 				indiceMayor = j;
 			}
 		}
+		
 		if(pDatosTest->salidas[i][indiceMayor] == 1){
 			ccr++;
 		}
+		
 		if(matrizConf != NULL){
 			
 			int j=0;
@@ -621,7 +626,7 @@ void PerceptronMulticapa::ejecutarAlgoritmo(Datos * pDatosTrain, Datos * pDatosT
 	nNumPatronesTrain = pDatosTrain->nNumPatrones;
 	
 	Datos * pDatosValidacion = NULL;
-	double validationError = 0;
+	double validationError = 0.0;
 	//Esta varibale no la uso.
 	//double previousValidationError = 0;
 	double minValidationError = 0;
@@ -727,6 +732,12 @@ void PerceptronMulticapa::ejecutarAlgoritmo(Datos * pDatosTrain, Datos * pDatosT
 		// Comprobar condiciones de parada de validación y forzar
 
 		//cout << "Iteración " << countTrain << "\t Error de entrenamiento: " << trainError << "\t Error de test: " << testError << "\t Error de validacion: " << validationError << endl;
+		
+		double ccrT = testClassification(pDatosTest, matrizConf);
+		double ccrt = testClassification(pDatosTrain);
+		
+		cout << ccrt << " " << ccrT << endl;
+		
 
 	} while ( countTrain<maxiter );
 
@@ -746,18 +757,45 @@ void PerceptronMulticapa::ejecutarAlgoritmo(Datos * pDatosTrain, Datos * pDatosT
 		alimentarEntradas(pDatosTest->entradas[i]);
 		propagarEntradas();
 		recogerSalidas(prediccion);
-		/*for(int j=0; j<pDatosTest->nNumSalidas; j++)
+		/*
+		for(int j=0; j<pDatosTest->nNumSalidas; j++)
 			cout << pDatosTest->salidas[i][j] << " -- " << prediccion[j] << " \\\\ " ;
 		cout << endl;
-		delete[] prediccion;
 		*/
+		
+		/*Bucle para obtener qué letras de nomnist identifica mal*/
+		/*
+		double mayor = prediccion[0];
+		int	indice_mayor = 0;
+		
+		for(int j=0; j<pDatosTest->nNumSalidas; j++){
+			if(prediccion[j] > mayor){
+				mayor = prediccion[j];
+				indice_mayor = j;
+			}
+		}
+		
+		if(pDatosTest->salidas[i][indice_mayor] != 1){		
+			cout << "indice: "<< i << endl;
+		}
+		*/
+	
+		delete[] prediccion;
+		
 	}
-
+	/*
 	*errorTest=test(pDatosTest,funcionError);;
 	*errorTrain=minTrainError;
 	*ccrTest = testClassification(pDatosTest, matrizConf);
-	*ccrTrain = testClassification(pDatosTrain, matrizConf);
-
+	*ccrTrain = testClassification(pDatosTrain);
+	*/
+	
+	/*for(int i=0; i<pDatosTest->nNumSalidas; i++){
+	
+	cout << ccrTrain[i] << "," << ccrTest[i] << endl;
+	
+	}
+	*/
 }
 
 // OPCIONAL - KAGGLE
