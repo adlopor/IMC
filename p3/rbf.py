@@ -86,6 +86,8 @@ def entrenar_rbf_total(train_file, test_file, classification, ratio_rbf, l2, eta
         print("*********************")
         print("MSE de entrenamiento: %f +- %f" % (np.mean(train_mses), np.std(train_mses)))
         print("MSE de test: %f +- %f" % (np.mean(test_mses), np.std(test_mses)))
+        # Si es un problema de clasificación se imprime tb el CCR
+        if classification:
         print("CCR de entrenamiento: %.2f%% +- %.2f%%" % (np.mean(train_ccrs), np.std(train_ccrs)))
         print("CCR de test: %.2f%% +- %.2f%%" % (np.mean(test_ccrs), np.std(test_ccrs)))
 
@@ -145,6 +147,10 @@ def entrenar_rbf(train_file, test_file, classification, ratio_rbf, l2, eta, outp
                                                                            outputs)
 
     #TODO: Obtener num_rbf a partir de ratio_rbf
+    num_rbf = int(ratio_rbf * train_inputs.shape[0])
+    if num_rbf <= 0:
+        sys.exit()
+
     print("Número de RBFs utilizadas: %d" %(num_rbf))
     kmedias, distancias, centros = clustering(classification, train_inputs, 
                                               train_outputs, num_rbf)
@@ -162,6 +168,9 @@ def entrenar_rbf(train_file, test_file, classification, ratio_rbf, l2, eta, outp
     TODO: Calcular las distancias de los centroides a los patrones de test
           y la matriz R de test
     """
+
+    distancias_test =  sp.spatial.distance.cdist(test_inputs, centros, metric='euclidean')
+    matriz_r_test = calcular_matriz_r(distancias_test, radios)
 
     # # # # KAGGLE # # # #
     if model_file != "":
@@ -189,13 +198,38 @@ def entrenar_rbf(train_file, test_file, classification, ratio_rbf, l2, eta, outp
         TODO: Obtener las predicciones de entrenamiento y de test y calcular
               el MSE
         """
+        train_predictions = np.dot(matriz_r_train, coeficientes)
+        test_predictions = np.dot(matriz_r_test, coeficientes)
+
+        #train_predictions = np.around(np.dot(matriz_r_train, coeficientes))
+        #test_predictions = np.around(np.dot(matriz_r_test, coeficientes))
+
+        train_mse = mean_squared_error(train_outputs, train_predictions)
+        test_mse = mean_squared_error(test_outputs, test_predictions)
+
+        train_ccr=0
+        test_ccr=0
+
     else:
         """
         TODO: Obtener las predicciones de entrenamiento y de test y calcular
               el CCR. Calcular también el MSE, comparando las probabilidades 
               obtenidas y las probabilidades objetivo
         """
+        train_predictions = logreg.predict(matriz_r_train)
+        test_predictions = logreg.predict(matriz_r_test)
 
+        # Aplicacion de la funcion del error cuadratico a las salidas de entrenamiento y a la estimada de entrenamiento
+        train_mse = mean_squared_error(train_predictions, train_outputs)
+        # Aplicacion de la funcion del error cuadratico a las salidas de entrenamiento y a la estimada de entrenamiento
+        test_mse = mean_squared_error(test_predictions, test_outputs)
+
+        train_ccr = accuracy_score(train_predictions, train_outputs)*100
+        test_ccr = accuracy_score(test_predictions, test_outputs)*100
+
+        #print(test_outputs)
+        #print(test_predictions)
+    
     return train_mse, test_mse, train_ccr, test_ccr
 
     
