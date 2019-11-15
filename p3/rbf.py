@@ -16,23 +16,25 @@ import math #Paquete de recursos matemáticos.
 import numpy as np #Paquete para la computación de matrices.
 import pandas as pd #Proporciona estructuras de datos y herramientas de análisis de datos de alto rendimiento.
 import random as rd #Para generar números aleatorios.
-import warnings
+import warnings #Para que sirve la librería warning? Creo que para silenciar los warnings de Python xq es muy puñetero.
 
 import sklearn #Módulo para Machine Learning en Python.
 #Módulos scikit learn:
-import sklearn.cluster 
-import sklearn.metrics
-import sklearn.preprocessing
-import scipy.spatial.distance
-import sklearn.linear_model
-import sklearn.metrics
-from sklearn.model_selection import train_test_split
+import sklearn.cluster #De este paquete usamos el método para calcular el KMeans.
+import sklearn.metrics #Lo usamos porque incluye métodos para calcular el MSE y el CCR.
+import sklearn.preprocessing #Para cambiar los vectores de características sin procesar en una representación que sea más adecuada para los estimadores posteriores.
+import scipy.spatial.distance #¿Para calcular la matriz de distancia? Centroides?
+import sklearn.linear_model #Para la función de Regresión Logística.
+from sklearn.model_selection import train_test_split #Para inicializar los centroides?
 
 #para que sirve (preguntar a chema)
+#Creo que ignorar los warnings que genera el fukin python.
 warnings.filterwarnings('ignore')
 
 
 @click.command()
+
+# TODO incluir el resto de parámetros...
 
 @click.option('--train_file', '-t', default=None, required=True,
               help=u'Fichero con los datos de entrenamiento.')
@@ -48,8 +50,6 @@ warnings.filterwarnings('ignore')
               help=u'Numero de variables que se tomarán como salidas (siempre estan al final de la matriz).')
 @click.option('--ratio_rbf', '-r', default=0.1, required=False, show_default=True,
               help=u'Ratio (en tanto por uno) de neuronas RBF con respecto al total de patrones.')
-
-# TODO incluir el resto de parámetros...
 
 @click.option('--model_file', '-m', default="", show_default=True, required=False,
               help=u'Fichero en el que se guardará o desde el que se cargará el modelo (si existe el flag p).') # KAGGLE
@@ -136,7 +136,7 @@ def entrenar_rbf_total(train_file, test_file, classification, ratio_rbf, l2, eta
 
 #Función para entrenar a la red RBF. ¿Diferencia entre esta función y la de arriba? (preguntar a chema)  
 def entrenar_rbf(train_file, test_file, classification, ratio_rbf, l2, eta, outputs, model_file=""):
-    #Ayuda para entender cómo funciona la función. (Preguntar a chema lo de las comillas)
+    
     """ Modelo de aprendizaje supervisado mediante red neuronal de tipo RBF.
         Una única ejecución.
         Recibe los siguientes parámetros:
@@ -169,6 +169,7 @@ def entrenar_rbf(train_file, test_file, classification, ratio_rbf, l2, eta, outp
                                                                            outputs)
 
     #TODO: Obtener num_rbf a partir de ratio_rbf
+    #redondeamos el producto de ratio_rbf con el número de patrones de entrada para obtener el número de neuronas de la red.
     num_rbf = round(ratio_rbf * len(train_inputs))
 
     print("Número de RBFs utilizadas: %d" %(num_rbf))
