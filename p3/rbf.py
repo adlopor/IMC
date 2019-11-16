@@ -10,25 +10,31 @@ Created on Wed Oct 28 12:37:04 2016
 import pickle #Librería para codificar y decodificar archivos para devolver la jerquía de clases entre objetos.
 import os #Este módulo proporciona una forma portátil de utilizar la funcionalidad dependiente del sistema operativo.
 
+#para solucionar conflictos entre versiones 
+import sys
+sys.excepthook = sys.__excepthook__
+
+
 # Poner para que es cada librería
 import click #Para crear interfaces de línea de comando.
 import math #Paquete de recursos matemáticos.
 import numpy as np #Paquete para la computación de matrices.
 import pandas as pd #Proporciona estructuras de datos y herramientas de análisis de datos de alto rendimiento.
 import random as rd #Para generar números aleatorios.
-import warnings #Para que sirve la librería warning? Creo que para silenciar los warnings de Python xq es muy puñetero.
+import warnings #Para silenciar los warnings
 
-import sklearn #Módulo para Machine Learning en Python.
+#Mejor importar módulo a módulo (como el Cholo), para que ejecute más rápido.
+
+#import sklearn #Módulo para Machine Learning en Python.
 #Módulos scikit learn:
 import sklearn.cluster #De este paquete usamos el método para calcular el KMeans.
 import sklearn.metrics #Lo usamos porque incluye métodos para calcular el MSE y el CCR.
 import sklearn.preprocessing #Para cambiar los vectores de características sin procesar en una representación que sea más adecuada para los estimadores posteriores.
-import scipy.spatial.distance #¿Para calcular la matriz de distancia? Centroides?
+import scipy.spatial.distance #Para calcular la matriz de distancia, para los Centroides.
 import sklearn.linear_model #Para la función de Regresión Logística.
 from sklearn.model_selection import train_test_split #Para inicializar los centroides?
 
-#para que sirve (preguntar a chema)
-#Creo que ignorar los warnings que genera el fukin python.
+#Para silenciar los warnigns de Python (son mu pesaos))
 warnings.filterwarnings('ignore')
 
 
@@ -75,11 +81,11 @@ def entrenar_rbf_total(train_file, test_file, classification, ratio_rbf, l2, eta
         test_mses = np.empty(5)
         test_ccrs = np.empty(5)
 
-        #Preguntar a chema.
+	#Leemos aquí y ahorramos timpo para la línea 91.
         train_inputs, train_outputs, test_inputs, test_outputs = lectura_datos(train_file, test_file, outputs) 
         
         #Desde 1 hasta 5 incrementando de uno en uno? (preguntar chema)
-        for s in range(1,6,1):
+        for s in range(1,6,1):#Por defecto es 1 el incremento(último 1 del paréntesis es el incremento).
             print("-----------")
             print("Semilla: %d" % s)
             print("-----------")
@@ -87,9 +93,8 @@ def entrenar_rbf_total(train_file, test_file, classification, ratio_rbf, l2, eta
             #Se inicializan las semillas de forma aleatoria.
             np.random.seed(s)
             
-            #Preguntar a chema (no entiendo)
             train_mses[s-1], test_mses[s-1], train_ccrs[s-1], test_ccrs[s-1] = \
-                entrenar_rbf(train_file, test_file, classification, ratio_rbf, l2, eta, outputs, \
+                entrenar_rbf(train_inputs, train_outputs, test_inputs, test_outputs, classification, ratio_rbf, l2, eta, outputs, \
                              model_file and "{}/{}.pickle".format(model_file, s) or "")
                              
             #Chivatos del MSE y CCR obtenidos en cada iteración (semilla) para los conjuntos de entrenamiento y de test.
@@ -107,8 +112,8 @@ def entrenar_rbf_total(train_file, test_file, classification, ratio_rbf, l2, eta
 
         # Si es un problema de clasificación se imprime también el CCR
         if classification:
-        print("CCR de entrenamiento: %.2f%% +- %.2f%%" % (np.mean(train_ccrs), np.std(train_ccrs)))
-        print("CCR de test: %.2f%% +- %.2f%%" % (np.mean(test_ccrs), np.std(test_ccrs)))
+           print("CCR de entrenamiento: %.2f%% +- %.2f%%" % (np.mean(train_ccrs), np.std(train_ccrs)))
+           print("CCR de test: %.2f%% +- %.2f%%" % (np.mean(test_ccrs), np.std(test_ccrs)))
 
     else: #Si está activado el modo de predicción (se usa para el Kaggle)
 
@@ -135,7 +140,7 @@ def entrenar_rbf_total(train_file, test_file, classification, ratio_rbf, l2, eta
             print(s)
 
 #Función para entrenar a la red RBF. ¿Diferencia entre esta función y la de arriba? (preguntar a chema)  
-def entrenar_rbf(train_file, test_file, classification, ratio_rbf, l2, eta, outputs, model_file=""):
+def entrenar_rbf(train_inputs, train_outputs, test_inputs, test_outputs, classification, ratio_rbf, l2, eta, outputs, model_file=""):
     
     """ Modelo de aprendizaje supervisado mediante red neuronal de tipo RBF.
         Una única ejecución.
@@ -164,17 +169,15 @@ def entrenar_rbf(train_file, test_file, classification, ratio_rbf, l2, eta, outp
               En el caso de regresión, devolvemos un cero.
     """
     
-    train_inputs, train_outputs, test_inputs, test_outputs = lectura_datos(train_file, 
-                                                                           test_file,
-                                                                           outputs)
+    #train_inputs, train_outputs, test_inputs, test_outputs = lectura_datos(train_file, test_file, outputs)
 
     #TODO: Obtener num_rbf a partir de ratio_rbf
     #redondeamos el producto de ratio_rbf con el número de patrones de entrada para obtener el número de neuronas de la red.
     num_rbf = round(ratio_rbf * len(train_inputs))
 
     print("Número de RBFs utilizadas: %d" %(num_rbf))
-    kmedias, distancias, centros = clustering(classification, train_inputs, 
-                                              train_outputs, num_rbf)
+    
+    kmedias, distancias, centros = clustering(classification, train_inputs, train_outputs, num_rbf)
     
     radios = calcular_radios(centros, num_rbf)
     
@@ -182,6 +185,10 @@ def entrenar_rbf(train_file, test_file, classification, ratio_rbf, l2, eta, outp
 
     #Si no es clasificación.
     if not classification:
+	
+	#Beta traspuesta = inversa R * Y 
+	#Matriz coeficientes = (salidas RBF ^ -1) * Salidas predecidas
+	#R * Bt = Y
         coeficientes = invertir_matriz_regresion(matriz_r, train_outputs)
         train_predictions = np.matmul(matriz_r, coeficientes)
         train_mse = sklearn.metrics.mean_squared_error(train_predictions,train_outputs)
@@ -197,8 +204,7 @@ def entrenar_rbf(train_file, test_file, classification, ratio_rbf, l2, eta, outp
         train_ccr = 100*logreg.score(matriz_r, train_outputs)
 
     """
-    TODO: Calcular las distancias de los centroides a los patrones de test
-          y la matriz R de test
+    TODO: Calcular las distancias de los centroides a los patrones de test y la matriz R de test
     """
 
     distancias_test = kmedias.transform(test_inputs)
@@ -227,8 +233,7 @@ def entrenar_rbf(train_file, test_file, classification, ratio_rbf, l2, eta, outp
 
     if not classification:
         """
-        TODO: Obtener las predicciones de entrenamiento y de test y calcular
-              el MSE
+        TODO: Obtener las predicciones de entrenamiento y de test y calcular el MSE
         """
         test_predictions = np.matmul(matriz_r_test, coeficientes)
         test_mse = sklearn.metrics.mean_squared_error(test_predictions,test_outputs)
@@ -243,6 +248,7 @@ def entrenar_rbf(train_file, test_file, classification, ratio_rbf, l2, eta, outp
         """
         """test_predictions = logreg.predict(matriz_r_test)"""
         predicciones = logreg.predict_proba(matriz_r_test)
+	#OneHotEncoder para transformar las salidas en matriz de categorización (ver apuntes).
         salidas_test = sklearn.preprocessing.OneHotEncoder(categories='auto').fit_transform(test_outputs).toarray()
 
         test_mse = sklearn.metrics.mean_squared_error(predicciones,salidas_test)
@@ -301,7 +307,7 @@ def inicializar_centroides_clas(train_inputs, train_outputs, num_rbf):
     """
     
     #TODO: Completar el código de la función
-     x, centroides, y_train, y_test = train_test_split(train_inputs, train_outputs, stratify=train_outputs, test_size=num_rbf/len(train_inputs))
+    x, centroides, y_train, y_test = train_test_split(train_inputs, train_outputs, stratify=train_outputs, test_size=num_rbf/len(train_inputs))
 
     return centroides
 
@@ -375,6 +381,7 @@ def calcular_matriz_r(distancias, radios):
 
     #TODO: Completar el código de la función
     #Creamos una matriz vacia
+    #Fórmula de la normal (función gaussiana, viene en los apuntes).
     matriz_r = np.empty([len(distancias),len(radios)+1])
     matriz_r.astype(np.float64)
     for i in range(0,len(distancias)): 
@@ -402,7 +409,7 @@ def invertir_matriz_regresion(matriz_r, train_outputs):
     """
 
     #TODO: Completar el código de la función
-     if len(matriz_r)==len(matriz_r[0]):
+    if len(matriz_r)==len(matriz_r[0]):
         coeficientes = np.matmul(np.linalg.inv(matriz_r),train_outputs)
     else:
         coeficientes = np.matmul(np.linalg.pinv(matriz_r),train_outputs)
@@ -435,6 +442,7 @@ def logreg_clasificacion(matriz_r, train_outputs, eta, l2):
         logreg = sklearn.linear_model.LogisticRegression(penalty='l2',C=1/eta,solver='liblinear',multi_class='auto',max_iter=600)
     else:
         logreg = sklearn.linear_model.LogisticRegression(penalty='l1',C=1/eta,solver='liblinear',multi_class='auto',max_iter=600)
+    
     logreg.fit(matriz_r,train_outputs.ravel())
   
     return logreg
