@@ -1,0 +1,132 @@
+Coeficiente:  1.0
+Coeficiente:  1.0
+Coeficiente:  1.0
+Coeficiente:  1.0
+Coeficiente:  1.0
+*********************
+Resumen de resultados
+*********************
+MSE de entrenamiento: 0.053558 +- 0.001352
+MSE de test: 0.052546 +- 0.001058
+CCR de entrenamiento: 93.25% +- 0.58%
+CCR de test: 93.21% +- 0.45%
+Coeficiente:  10.0
+Coeficiente:  10.0
+Coeficiente:  10.0
+Coeficiente:  10.0
+Coeficiente:  10.0
+*********************
+Resumen de resultados
+*********************
+MSE de entrenamiento: 0.035543 +- 0.001928
+MSE de test: 0.039284 +- 0.002148
+CCR de entrenamiento: 95.46% +- 0.45%
+CCR de test: 95.41% +- 0.82%
+Coeficiente:  100.0
+Coeficiente:  100.0
+Coeficiente:  100.0
+Coeficiente:  100.0
+Coeficiente:  100.0
+*********************
+Resumen de resultados
+*********************
+MSE de entrenamiento: 0.029088 +- 0.002771
+MSE de test: 0.034598 +- 0.001412
+CCR de entrenamiento: 95.58% +- 0.57%
+CCR de test: 96.33% +- 0.00%
+Coeficiente:  1000.0
+Coeficiente:  1000.0
+Coeficiente:  1000.0
+Coeficiente:  1000.0
+Coeficiente:  1000.0
+*********************
+Resumen de resultados
+*********************
+MSE de entrenamiento: 0.026734 +- 0.003233
+MSE de test: 0.034479 +- 0.001115
+CCR de entrenamiento: 96.13% +- 0.63%
+CCR de test: 95.96% +- 0.45%
+Coeficiente:  10000.0
+Coeficiente:  10000.0
+Coeficiente:  10000.0
+Coeficiente:  10000.0
+Coeficiente:  10000.0
+*********************
+Resumen de resultados
+*********************
+MSE de entrenamiento: 0.026284 +- 0.003410
+MSE de test: 0.035052 +- 0.001714
+CCR de entrenamiento: 96.01% +- 0.70%
+CCR de test: 95.96% +- 0.45%
+Coeficiente:  99999.99999999999
+Coeficiente:  99999.99999999999
+Coeficiente:  99999.99999999999
+Coeficiente:  99999.99999999999
+Coeficiente:  99999.99999999999
+*********************
+Resumen de resultados
+*********************
+MSE de entrenamiento: 0.026243 +- 0.003443
+MSE de test: 0.035139 +- 0.001757
+CCR de entrenamiento: 96.13% +- 0.69%
+CCR de test: 95.96% +- 0.45%
+Coeficiente:  1000000.0
+Coeficiente:  1000000.0
+Coeficiente:  1000000.0
+Coeficiente:  1000000.0
+Coeficiente:  1000000.0
+*********************
+Resumen de resultados
+*********************
+MSE de entrenamiento: 0.026241 +- 0.003446
+MSE de test: 0.035170 +- 0.001793
+CCR de entrenamiento: 96.13% +- 0.69%
+CCR de test: 95.96% +- 0.45%
+Coeficiente:  10000000.0
+Coeficiente:  10000000.0
+Coeficiente:  10000000.0
+Coeficiente:  10000000.0
+Coeficiente:  10000000.0
+*********************
+Resumen de resultados
+*********************
+MSE de entrenamiento: 0.026240 +- 0.003446
+MSE de test: 0.035169 +- 0.001795
+CCR de entrenamiento: 96.13% +- 0.69%
+CCR de test: 95.96% +- 0.45%
+Coeficiente:  100000000.0
+Coeficiente:  100000000.0
+Coeficiente:  100000000.0
+Coeficiente:  100000000.0
+Coeficiente:  100000000.0
+*********************
+Resumen de resultados
+*********************
+MSE de entrenamiento: 0.026239 +- 0.003446
+MSE de test: 0.035169 +- 0.001795
+CCR de entrenamiento: 96.13% +- 0.69%
+CCR de test: 95.96% +- 0.45%
+Coeficiente:  999999999.9999999
+Coeficiente:  999999999.9999999
+Coeficiente:  999999999.9999999
+Coeficiente:  999999999.9999999
+Coeficiente:  999999999.9999999
+*********************
+Resumen de resultados
+*********************
+MSE de entrenamiento: 0.026239 +- 0.003446
+MSE de test: 0.035170 +- 0.001795
+CCR de entrenamiento: 96.13% +- 0.69%
+CCR de test: 95.96% +- 0.45%
+Coeficiente:  10000000000.0
+Coeficiente:  10000000000.0
+Coeficiente:  10000000000.0
+Coeficiente:  10000000000.0
+Coeficiente:  10000000000.0
+*********************
+Resumen de resultados
+*********************
+MSE de entrenamiento: 0.026239 +- 0.003446
+MSE de test: 0.035170 +- 0.001795
+CCR de entrenamiento: 96.13% +- 0.69%
+CCR de test: 95.96% +- 0.45%
