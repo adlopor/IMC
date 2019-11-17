@@ -86,9 +86,9 @@ def entrenar_rbf_total(train_file, test_file, classification, ratio_rbf, l2, eta
         
         #Desde 1 hasta 5 incrementando de uno en uno? (preguntar chema)
         for s in range(1,6,1):#Por defecto es 1 el incremento(último 1 del paréntesis es el incremento).
-            print("-----------")
-            print("Semilla: %d" % s)
-            print("-----------")
+            #print("-----------")
+            #print("Semilla: %d" % s)
+            #print("-----------")
 
             #Se inicializan las semillas de forma aleatoria.
             np.random.seed(s)
@@ -98,10 +98,10 @@ def entrenar_rbf_total(train_file, test_file, classification, ratio_rbf, l2, eta
                              model_file and "{}/{}.pickle".format(model_file, s) or "")
                              
             #Chivatos del MSE y CCR obtenidos en cada iteración (semilla) para los conjuntos de entrenamiento y de test.
-            print("MSE de entrenamiento: %f" % train_mses[s-1])
-            print("MSE de test: %f" % test_mses[s-1])
-            print("CCR de entrenamiento: %.2f%%" % train_ccrs[s-1])
-            print("CCR de test: %.2f%%" % test_ccrs[s-1])
+            #print("MSE de entrenamiento: %f" % train_mses[s-1])
+            #print("MSE de test: %f" % test_mses[s-1])
+            #print("CCR de entrenamiento: %.2f%%" % train_ccrs[s-1])
+            #print("CCR de test: %.2f%%" % test_ccrs[s-1])
         
         #Chivato resumen de los datos obtenidos (se imprime solo el MSE a no ser que sea para clasificación)
         print("*********************")
@@ -176,7 +176,7 @@ def entrenar_rbf(train_inputs, train_outputs, test_inputs, test_outputs, classif
     #redondeamos el producto de ratio_rbf con el número de patrones de entrada para obtener el número de neuronas de la red.
     num_rbf = round(ratio_rbf * len(train_inputs))
 
-    print("Número de RBFs utilizadas: %d" %(num_rbf))
+    #print("Número de RBFs utilizadas: %d" %(num_rbf))
     
     kmedias, distancias, centros = clustering(classification, train_inputs, train_outputs, num_rbf)
     
@@ -446,7 +446,7 @@ def logreg_clasificacion(matriz_r, train_outputs, eta, l2):
     else:
         logreg = sklearn.linear_model.LogisticRegression(penalty='l1',C=1/eta,solver='liblinear',multi_class='auto',max_iter=600)
     
-    #print("Coeficiente: ", (1/eta))
+    print("Coeficiente: ", (1/eta))
     logreg.fit(matriz_r,train_outputs.ravel())
   
     return logreg
