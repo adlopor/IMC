@@ -109,7 +109,8 @@ def entrenar_rbf_total(train_file, test_file, classification, ratio_rbf, l2, eta
         print("*********************")
         print("MSE de entrenamiento: %f +- %f" % (np.mean(train_mses), np.std(train_mses)))
         print("MSE de test: %f +- %f" % (np.mean(test_mses), np.std(test_mses)))
-
+	
+	
         # Si es un problema de clasificación se imprime también el CCR
         if classification:
            print("CCR de entrenamiento: %.2f%% +- %.2f%%" % (np.mean(train_ccrs), np.std(train_ccrs)))
@@ -192,7 +193,8 @@ def entrenar_rbf(train_inputs, train_outputs, test_inputs, test_outputs, classif
         coeficientes = invertir_matriz_regresion(matriz_r, train_outputs)
         train_predictions = np.matmul(matriz_r, coeficientes)
         train_mse = sklearn.metrics.mean_squared_error(train_predictions,train_outputs)
-        #train_ccr = 100*sklearn.metrics.accuracy_score(train_outputs,np.around(train_predictions))
+	#Para el último apartado:        
+	#train_ccr = 100*sklearn.metrics.accuracy_score(train_outputs,np.around(train_predictions))
         train_ccr = 0
 
     #Si lo es.
@@ -334,7 +336,8 @@ def clustering(clasificacion, train_inputs, train_outputs, num_rbf):
     if(clasificacion):
         centroides = inicializar_centroides_clas(train_inputs,train_outputs,num_rbf)
         kmedias = sklearn.cluster.KMeans(len(centroides),centroides,1,500).fit(train_inputs,train_outputs)
-        #kmedias = sklearn.cluster.KMeans(num_rbf, init='k-means++', n_init=1, max_iter=500).fit(train_inputs,train_outputs)              
+	#cambiamos el algoritmo        
+	#kmedias = sklearn.cluster.KMeans(num_rbf, init='k-means++', n_init=1, max_iter=500).fit(train_inputs,train_outputs)              
     else:
         #kmedias = sklearn.cluster.KMeans(num_rbf, init='k-means++', n_init=1, max_iter=500).fit(train_inputs,train_outputs)              
         kmedias = sklearn.cluster.KMeans(num_rbf, init='random', n_init=1, max_iter=500).fit(train_inputs,train_outputs)              
@@ -443,6 +446,7 @@ def logreg_clasificacion(matriz_r, train_outputs, eta, l2):
     else:
         logreg = sklearn.linear_model.LogisticRegression(penalty='l1',C=1/eta,solver='liblinear',multi_class='auto',max_iter=600)
     
+    #print("Coeficiente: ", (1/eta))
     logreg.fit(matriz_r,train_outputs.ravel())
   
     return logreg
