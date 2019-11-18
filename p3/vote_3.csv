@@ -1,0 +1,7 @@
+*********************
+Resumen de resultados
+*********************
+MSE de entrenamiento: 0.027882 +- 0.004197
+MSE de test: 0.043090 +- 0.009777
+CCR de entrenamiento: 96.07% +- 0.81%
+CCR de test: 94.86% +- 1.10%

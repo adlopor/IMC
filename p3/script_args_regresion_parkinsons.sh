@@ -1,1 +1,1 @@
-./script1regresion_parkinsons.sh /home/p42loora/Desktop/gitkraken/IMC/p3/basesDatosPr3IMC/csv/train_parkinsons.csv /home/p42loora/Desktop/gitkraken/IMC/p3/basesDatosPr3IMC/csv/test_parkinsons.csv parkinsons_eta.csv
+./script1regresion_parkinsons.sh /home/p42loora/Desktop/gitkraken/IMC/p3/basesDatosPr3IMC/csv/train_parkinsons.csv /home/p42loora/Desktop/gitkraken/IMC/p3/basesDatosPr3IMC/csv/test_parkinsons.csv parkinsons_3.csv
