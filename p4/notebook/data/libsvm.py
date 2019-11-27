@@ -18,8 +18,11 @@ X = data.iloc[:,:-1].values
 y = data.iloc[:,-1].values
 
 # Entrenar el modelo SVM
-svm_model = svm.SVC(kernel='linear',C=200)
+svm_model = svm.SVC(kernel='linear',C=10000)
 svm_model.fit(X, y)
+
+#Para obtener el CCR (pregunta 3).
+print("CCR: " ,svm_model.score(X,y))
 
 # Representar los puntos
 plt.figure(1)
