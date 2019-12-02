@@ -100,9 +100,9 @@ def entrenar_rbf_total(train_file, test_file, classification, ratio_rbf, l2, eta
         # Por defecto es 1 el incremento(último 1 del paréntesis es el
         # incremento).
         for s in range(1, 6, 1):
-            # print("-----------")
-            #print("Semilla: %d" % s)
-            # print("-----------")
+            print("-----------")
+            print("Semilla: %d" % s)
+            print("-----------")
 
             # Se inicializan las semillas de forma aleatoria.
             np.random.seed(s)
@@ -112,10 +112,10 @@ def entrenar_rbf_total(train_file, test_file, classification, ratio_rbf, l2, eta
                              model_file and "{}/{}.pickle".format(model_file, s) or "")
 
             # Chivatos del MSE y CCR obtenidos en cada iteración (semilla) para los conjuntos de entrenamiento y de test.
-            #print("MSE de entrenamiento: %f" % train_mses[s-1])
-            #print("MSE de test: %f" % test_mses[s-1])
-            #print("CCR de entrenamiento: %.2f%%" % train_ccrs[s-1])
-            #print("CCR de test: %.2f%%" % test_ccrs[s-1])
+            print("MSE de entrenamiento: %f" % train_mses[s-1])
+            print("MSE de test: %f" % test_mses[s-1])
+            print("CCR de entrenamiento: %.2f%%" % train_ccrs[s-1])
+            print("CCR de test: %.2f%%" % test_ccrs[s-1])
 
         # Chivato resumen de los datos obtenidos (se imprime solo el MSE a no
         # ser que sea para clasificación)
